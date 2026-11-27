@@ -361,6 +361,7 @@ when its version moves, and most never change a record that is already on file.
 | Essential reporting nominations | `js/data/featured/nominations.json` | `version` |
 | Fixes to a published page's words | `seeds/text-fixes.json` | a new `fix` id (also fix the `seeds/history/` copy) |
 | Facility records, merges, names | `seeds/facility-records.json` and the other `seeds/*.json` read by `kop_apply_template_assignments()` | the template assignments version |
+| New facility records | `seeds/new-facilities.json` (`kop_apply_new_facility_seeds()`, added once by name and state through the data form's save; optional `provenance_source` and `home_of` {id, unique_name} apply when the record is created; `php -d extension=pdo_sqlite -d extension=mbstring scripts/test-new-facility-seeds.php` runs the file on a copy of the mirror) | the template assignments version |
 | Young adult programs (18+) | `seeds/young-adult-programs.json` (`kop_ya_apply_seeds()`, added once by name) | the template assignments version |
 | A facility record that belongs in a related category (Christian Rehabs for Adults...) | `seeds/related-moves.json` (`kop_apply_related_move_seeds()`, once per record; Undo `kop_rmove_undo()`) | the template assignments version |
 | Corrections to a person's past jobs (hide, rename, years, source) | `seeds/person-job-fixes.json` (`kop_apply_person_job_fixes()`, once per `key`; Undo at KOP Tools > People > Past jobs) | the template assignments version |

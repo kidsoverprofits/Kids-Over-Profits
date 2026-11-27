@@ -4685,5 +4685,4119 @@
         "Added 2026-11-22 (owner: make sure his facility is on file)."
       ]
     }
+  },
+  {
+    "location_id": 40,
+    "location_name": "ALABAMA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Restoration Home",
+        "currentName": "",
+        "currentOperator": "Blanket Fort Hope",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "AL",
+        "country": "United States"
+      },
+      "location": "AL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://1819news.com/news/item/blanket-fort-hope-now-open-to-cover-sex-trafficking-victims-with-refuge-and-love",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "1819 News (2025-12-07): Blanket Fort Hope's restoration home in Shelby County, Alabama had its ribbon-cutting in November 2025 and expected its first child in January 2026. It serves female sex-trafficking victims ages 0-21, with plans to add young boys later. The article does not mention DHR licensing, and the Alabama Alliance residential provider list (2023) predates the home. Licensing should be verified with Alabama DHR. No adverse findings found.",
+        "Location as listed: Shelby County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 1), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 40,
+    "location_name": "ALABAMA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "WellHouse Child",
+        "currentName": "",
+        "currentOperator": "The WellHouse",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "AL",
+        "country": "United States"
+      },
+      "location": "AL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "DHR-licensed residential home for minors (exact license category not stated); Alabama Department of Human Resources (DHR)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://alabamaalliance.alabama.gov/wp-content/uploads/2023/08/HT-Residential-Service-Providers-in-AL.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "The Alabama Attorney General's Alabama Alliance list 'HT Residential Service Providers in AL' (2023 upload) lists WellHouse Child as serving minors 11-18 who are sex-trafficking survivors. The list describes it as 'DHR licensed', following DHR minimum standards, with placement via power of attorney from a guardian and 24/7 awake staff. The location is confidential (WellHouse mailing address in Odenville, St. Clair County area). License number and capacity were not found, and Alabama DHR has no public lookup that was checked. No abuse or safety findings were found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 3), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 17,
+    "location_name": "ARIZONA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Natalie's House",
+        "currentName": "",
+        "currentOperator": "APECA",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "AZ",
+        "country": "United States"
+      },
+      "location": "AZ",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential home (8 beds, girls 11-17)"
+      ],
+      "resourceLinks": [],
+      "notes": [
+        "Per End Slavery Now profile, APECA (Goodyear, AZ office) runs Natalie's House, an 8-bed home for girls 11-17 recovering from sexual exploitation. No license found; ADHS AZ Care Check / DCS licensing lookups could not be queried from here. No findings or news located; current operating status not confirmed.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 5), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 23,
+    "location_name": "COLORADO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Avanti House",
+        "currentName": "",
+        "currentOperator": "Extended Hands of Hope",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "CO",
+        "country": "United States"
+      },
+      "location": "CO",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential safe home for minors"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://coloradohealth.org/node/3106",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Extended Hands of Hope (Broomfield mailing address) runs Avanti House, a residential safe home for minor trafficking survivors on a 10-acre property in the Denver metro; a second home is planned (Colorado Health Foundation grant record). State licensing not confirmed; no findings located in 2 searches.",
+        "Location as listed: Denver metro.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 35), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 23,
+    "location_name": "COLORADO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Sarah's Home",
+        "currentName": "",
+        "currentOperator": "Adagio (formerly Sarah's Home Corp.)",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "CO",
+        "country": "United States"
+      },
+      "location": "CO",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Licensed residential home for girls (type not stated); Colorado (agency not named; likely Colorado Dept. of Human Services child care licensing)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.koaa.com/community/local-organization-expanding-resources-for-child-survivors-of-sex-trafficking",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Colorado Springs area, faith-based home for teenage girls who survived sex trafficking; housed 8 girls in Nov 2020 and said it had been licensed 8 years and open 5 (KOAA). Planned a boys' home (Jeremiah's Home). FOX21 sponsored piece (2024) says ages 12-17, operating. Link to 'Adagio' not confirmed. License type/number not found; no findings located.",
+        "Location as listed: Colorado Springs area.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 34), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Anti-Trafficking Safe Home – One More Child",
+        "currentName": "",
+        "currentOperator": "One More Child / Florida Baptist Children's Homes",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Florida DCF (FBCH is a DCF-licensed child-caring/child-placing agency; safe home certification not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.flsenate.gov/PublishedContent/Session/FiscalYear/FY2019-20/LocalFundingInitiativeRequests/FY2019-20_S1173.PDF",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "2019-20 Florida Senate local funding request (#1173) describes a safe home for sex-trafficking survivors ages 12-17, statewide service area, no address, bed count or license stated. One quick news search found no abuse/safety reports specific to this home (2012 Tampa Bay Times series on religious-exempt homes was about other homes - not verified as involving FBCH).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 45), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "CSEC Safe House – Ground Up Ministries",
+        "currentName": "",
+        "currentOperator": "Ground Up Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Cape Coral",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "Cape Coral, FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://causeiq.com/organizations/from-the-ground-up-ministries",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://mycharisma.com/cpn-articles/what-if-i-told-you-about-human-trafficking/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Legal name From The Ground Up Ministries, Inc. (EIN 81-3766503), Cape Coral FL (Cause IQ 813766503); latest 990 is FY2022. Charisma article (Oct 19, 2022) says it serves teenage girls with space for three. No licensing or DCF safe house certification found; small faith-based home - may be unlicensed or operating under a religious-exempt/foster arrangement; needs direct check with DCF Suncoast region. No findings found; current operating status unconfirmed.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 42), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Florida Safe Home / HERO House (supplied as Hope House)",
+        "currentName": "",
+        "currentOperator": "U.S. Institute Against Human Trafficking",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Florida DCF (certification not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/fla-s-only-safe-home-for-boy-sex-trafficking-victims-struggling-to-fill-beds-despite-growing-need",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "WFTS (Jul 30, 2021): USIAHT runs a 5-bed Florida safe home for boys under 18, rarely full; CEO said lack of DCF referrals threatened closure. Article gives no licensing info. Current operating status not confirmed (closure risk flagged in 2021); name 'HERO House' not confirmed in sources opened. No abuse/safety findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 48), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Magnolia Safe Houses",
+        "currentName": "",
+        "currentOperator": "Path2Freedom",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Naples",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "Naples, FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://impala.digital/public/profiles/47-3835818/programs",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.naplespress.com/2025/04/25/restoring-lives-of-trafficked-minors",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Naples FL nonprofit (EIN 47-3835818). 990-based profile (2022) names the 'Magnolia Safe House Property', 16 survivors served, 3,250+ safe nights. Naples Press (Apr 2025) describes a safe house for underage girls. No licensing or DCF safe house certification info found; no findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 46), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safe-house program – Wings of Shelter International",
+        "currentName": "",
+        "currentOperator": "Wings of Shelter International",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Reported as licensed through DCF (foster care); specific DCF safe house certification not confirmed; Florida DCF (per news report; license number not public)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.lehighacrescitizen.com/2024/02/02/providing-shelter-organization-helps-victims-of-trafficking/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Lehigh Acres Citizen (Feb 2, 2024): safe houses in Lehigh Acres and Estero for female minors (as young as 11, until 18); Fort Myers location no longer operating. Licensing claim is from the news article, not a state record. No findings found.",
+        "Location as listed: Lehigh Acres and Estero.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 49), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 7,
+    "location_name": "FLORIDA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Therapeutic safe home – Bridging Freedom",
+        "currentName": "",
+        "currentOperator": "Bridging Freedom",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "FL",
+        "country": "United States"
+      },
+      "location": "FL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Reported as 'state licensed' safe house (Bay News 9, Feb 2024); exact license type not confirmed; Florida Department of Children and Families (DCF) — safe house certification under s. 409.1678 F.S. not confirmed; Florida has no public residential group care license lookup"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.tampabay28.com/news/local-news/i-team-investigates/i-team-state-law-makers-are-looking-into-a-local-charitys-grant-money",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://baynews9.com/fl/tampa/news/2024/02/07/sex-trafficking-victim-safe-house",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://oppaga.fl.gov/Documents/Reports/26-03.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Girls 12-17, 12 beds, full with waitlist, per Bay News 9 (Feb 7, 2024). Article says 'state licensed' but names no agency. Statewide, OPPAGA reported only 5 DCF safe houses (Mar 2026), 4 in Suncoast region - report does not name providers. No abuse/safety findings found.",
+        "Location as listed: Tampa Bay area.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 41), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 20,
+    "location_name": "GEORGIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Mommy & Me / Family Support Housing – House of Cherith",
+        "currentName": "",
+        "currentOperator": "House of Cherith / City of Refuge",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "GA",
+        "country": "United States"
+      },
+      "location": "GA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://static1.squarespace.com/static/5c8ab5dee666690f53dea517/t/6447f3358ed4494a2f3837b1/1682436925524/HOC+Program+Overview_V2.pdf",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "House of Cherith (own 501(c)(3) since 2019, formerly a City of Refuge program) runs adult Safe House, Long-Term/Transitional, Mommy & Me family housing (mothers with their children), and 'Junior Care' for girls 12-17; locations Atlanta (incl. 1300 Joseph E. Boone Blvd NW campus), Bremen, Thomaston GA and Dallas TX; 60+ survivors at a time. Program overview PDF names no state license. Mommy & Me appears to be mostly adult mothers with children; Junior Care (minors) licensing status unknown. Georgia's RCC TRAILS public facility search (rcctrails.dhs.ga.gov) could not be reached from this environment, so no license lookup was possible. No findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 51), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 20,
+    "location_name": "GEORGIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Residential program – Tharros Place",
+        "currentName": "",
+        "currentOperator": "Tharros Place",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "GA",
+        "country": "United States"
+      },
+      "location": "GA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Georgia DHS OIG Residential Child Care Licensing (presumed; not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://aol.com/tharros-place-set-open-residential-111502665.html",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.yahoo.com/news/tharros-place-offers-children-trafficking-210921839.html",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Savannah-area (western Chatham County) 12-bed residential home for girls 12-17, per Savannah Morning News via AOL; WSAV (Jun 11, 2025) says nearly 20 teens served since Dec 2023. No licensing info in sources; RCC TRAILS lookup unreachable from here. No findings found.",
+        "Location as listed: Western Chatham County (Savannah area).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 52), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 35,
+    "location_name": "IOWA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Emergency youth shelter program – Youth and Shelter Services",
+        "currentName": "",
+        "currentOperator": "Youth and Shelter Services",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Mason City",
+        "state": "IA",
+        "country": "United States"
+      },
+      "location": "Mason City, IA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Iowa HHS (shelter care licensing) — not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://search.ne211.org/search/4cdca18d-fa1c-54f6-8251-195bc24e15a5",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://hhs.iowa.gov/media/7498/download",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Nebraska 211 listing shows YSS Emergency Shelter at a Mason City, Iowa address, serving youth under 18 (also Des Moines/Ames youth); an Iowa HHS 'Temporary Informal Shelter Beds' sheet lists YSS Mason City. No license number, capacity or inspection record found. Follow-up news search found no abuse/neglect findings, lawsuits or investigations involving YSS shelters (a search hit headlined 'After years of abuse allegations, Iowa youth home to close' was not opened; its title does not name YSS and it appears to concern a different facility, unconfirmed).",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 69), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 35,
+    "location_name": "IOWA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Family-style survivor home – Freedom House Ministries",
+        "currentName": "",
+        "currentOperator": "Freedom House Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IA",
+        "country": "United States"
+      },
+      "location": "IA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://humantraffickinghotline.org/es/node/11745",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "National Human Trafficking Hotline referral directory describes a faith-based '2 year restoration home' for exploited girls, ages 0-18, U.S. citizens/LPRs, nationwide referrals, 515 area code (central Iowa). No Iowa HHS license record was found; Iowa does not appear to publish a searchable child foster care facility lookup. Licensing and operating status unverified. Follow-up news searches (2 queries) found no abuse/neglect findings, lawsuits or investigations, and no news coverage that clearly identifies this home. A 2015 Word&Way article on an unnamed Des Moines trafficking safe house could not be tied to it. A Kansas nonprofit with the same name (House of Hope, Overland Park) is a different organization.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 67), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 1,
+    "location_name": "IDAHO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safe House – Twin Falls County",
+        "currentName": "",
+        "currentOperator": "Twin Falls County",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Twin Falls",
+        "state": "ID",
+        "country": "United States"
+      },
+      "location": "Twin Falls, ID",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Group home (youth crisis shelter); Idaho Department of Health and Welfare (presumed; county page says 'state licensed')"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://twinfallscounty.org/safe_house",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://hsso.idaho.gov/wp-content/uploads/2026/06/Idaho-HSSO-Residential-Tour-June-2026.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "County-run home-like shelter for youth 12-17 in crisis, up to 14 boys and girls; county describes it as a 'state licensed, local group home'. Listed as 'Safe House – Twin Falls' among facilities visited in the Idaho Health and Social Services Ombudsman's Spring 2026 residential tour, with no facility-specific findings. License number not found. Not CSEC-specific.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 58), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 38,
+    "location_name": "ILLINOIS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Cherish House",
+        "currentName": "",
+        "currentOperator": "Reclaim13",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IL",
+        "country": "United States"
+      },
+      "location": "IL",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Illinois DCFS would license a youth residential home; no license record located"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://cbsnews.com/chicago/news/reclaim-13-nonprofit-victims-sexual-abuse-exploitation-trafficking",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "CBS Chicago says Reclaim13 (operating since 2012, DuPage area) describes itself as a safe house for sexually exploited children 10-17, with a separate 18-25 program; 'Cherish House' not named in the sources I opened. DCFS licensing not verified (no public residential lookup reached). No adverse findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 61), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 36,
+    "location_name": "KANSAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Clover House",
+        "currentName": "",
+        "currentOperator": "Saint Francis Community Services / Saint Francis Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "KS",
+        "country": "United States"
+      },
+      "location": "KS",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Kansas Department of Health and Environment (likely; not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.gbtribune.com/news/business/saint-francis-community-services-hires-director-for-clover-house/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Great Bend Tribune (undated): residential program for girls 12+ who survived domestic minor sex trafficking; temporary site in Saline County for up to 4 girls. KSAL (2016-10-12) and the Diocese of West Missouri's Spirit (c. 2018) say it opened in 2016. No source after 2018 found, so it is unclear whether it still operates. Kansas KDHE licenses child care institutions/group boarding homes, but no searchable KDHE record for this home was found, so licensing is unconfirmed. Saint Francis Ministries faced wider scrutiny as a Kansas foster-care contractor, but no finding specific to Clover House was found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 70), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 36,
+    "location_name": "KANSAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Dakhil Safe Home",
+        "currentName": "",
+        "currentOperator": "Wichita Children's Home",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "KS",
+        "country": "United States"
+      },
+      "location": "KS",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Staff-secure facility (per WCH); Kansas Department of Health and Environment (likely; not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wch.org/who-we-serve/human-trafficking/dakhil-safe-home",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "WCH page: staff-secure residential facility for newly exited trafficking victims aged 17 and under, presumably in Wichita; capacity not stated. Kansas KDHE licenses child care institutions/group boarding homes, but no searchable KDHE record for this home was found, so licensing is unconfirmed. No adverse findings or news found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 72), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 36,
+    "location_name": "KANSAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Garver Program / Garver House",
+        "currentName": "",
+        "currentOperator": "Wichita Children's Home",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Wichita",
+        "state": "KS",
+        "country": "United States"
+      },
+      "location": "Wichita, KS",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Kansas Department of Health and Environment (likely; not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.kmuw.org/post/wichita-childrens-home-opens-new-facility-aid-victims-human-trafficking",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "KMUW (2018-12-24): Garver House opened fall 2018 in Wichita, up to 10 beds, for trafficked youth (mainly girls) stepping down from WCH's staff-secure unit. WCH's own site now describes the Garver Program as long-term residential therapy for girls 10-17; WCH is CARF-accredited. Kansas KDHE licenses child care institutions/group boarding homes, but no searchable KDHE record for this home was found, so licensing is unconfirmed. Two searches found no abuse/neglect findings or lawsuits specific to Wichita Children's Home.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 71), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 42,
+    "location_name": "LOUISIANA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Free Indeed Home",
+        "currentName": "",
+        "currentOperator": "Louisiana Coalition Against Human Trafficking",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "LA",
+        "country": "United States"
+      },
+      "location": "LA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.wwno.org/features/2016-01-13/northshore-shelter-provides-safety-for-victims-of-human-trafficking",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dcfs.louisiana.gov/division-of-management-finance/dcfs-licensed-facilities-5-23/",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "WWNO (2016-01-13) described Free Indeed Home as a confidential north-shore shelter for girls under 18 who were trafficked, 10 beds, licensed to operate (reported licensed in February; opened April 2015). It does not appear on DCFS's current licensed facilities table, which excludes pending facilities. No recent news found; may have closed or lost/changed license, needs confirmation with DCFS Licensing.",
+        "Location as listed: North shore (confidential).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 74), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 42,
+    "location_name": "LOUISIANA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Louisiana Love Home",
+        "currentName": "",
+        "currentOperator": "Louisiana Love Home for Children",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "LA",
+        "country": "United States"
+      },
+      "location": "LA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.prnewswire.com/news-releases/nedhsa-and-louisiana-love-home-for-children-partner-to-expand-behavioral-health-services-and-support-survivors-of-human-trafficking-302826846.html",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dcfs.louisiana.gov/division-of-management-finance/dcfs-licensed-facilities-5-23/",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Northeast Delta Human Services Authority press release (PR Newswire, 2026-07-15) describes a faith-based residential home in Northeast Louisiana for girls who experienced trauma, including trafficking survivors, with current residents. Not found by name on DCFS's licensed facilities table; could be licensed under another name or pending. Licensing status should be confirmed with DCFS. No adverse findings found.",
+        "Location as listed: Northeast Louisiana.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 75), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 41,
+    "location_name": "MARYLAND",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Monarch residential program",
+        "currentName": "",
+        "currentOperator": "TurnAround / YWCA of Annapolis and Anne Arundel County",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MD",
+        "country": "United States"
+      },
+      "location": "MD",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential program for youth 13-17 (license type not stated); State of Maryland (per operator; agency/license type not stated - likely DHS Social Services Administration/Office of Licensing and Monitoring, unconfirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.turnaroundinc.org/?p=8009",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.washingtonblade.com/2024/05/29/turning-around-sex-trafficking-safe-harbor/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://mgaleg.maryland.gov/2022RS/bond_initiatives/YWCA_Trafficking_Safe_House.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "TurnAround's own page describes Monarch as a voluntary residential program for trafficked youth 13-17, 12-18 month stays, undisclosed location, 'licensed by the State of Maryland' (self-reported, not a state record). Washington Blade (May 29, 2024): safe house built with YWCA of Annapolis & Anne Arundel County, awaiting final state licensing paperwork, no children in residence yet. 2022 state bond request: 8 bedrooms, youth 13-24, Anne Arundel County, on the YWCA DV safe house campus. No findings found.",
+        "Location as listed: Undisclosed.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 80), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 5,
+    "location_name": "MAINE",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Joe Kreisler Teen Shelter",
+        "currentName": "",
+        "currentOperator": "Preble Street",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "ME",
+        "country": "United States"
+      },
+      "location": "ME",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency overnight shelter for homeless/runaway youth ages 12-20 (Maine DHHS licensing not stated)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.themainewire.com/2025/07/suspect-arrested-in-stabbing-outside-teen-homeless-shelter-in-portland/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://preblestreet.org/2024/07/19/joes-place-bringing-services-for-youth-under-one-roof",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Preble Street: 28-bed shelter for ages 12-20, Maine's largest youth shelter; being combined with the Teen Center as 'Joe's Place' (site news lists a Sept 2026 release announcing it open). Not CSEC-specific. Source for the stabbing is a partisan outlet (The Maine Wire).",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 77), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 32,
+    "location_name": "MICHIGAN",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safehouse Treatment Program – Prism Project",
+        "currentName": "",
+        "currentOperator": "Prism Project",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MI",
+        "country": "United States"
+      },
+      "location": "MI",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.naco.org/articles/michigan-counties-provide-services-human-trafficking-survivors",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://flintside.com/flint-human-trafficking/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "NACo article describes a safehouse for sex-trafficked youth 13-17, up to 6 at a time, 6-18 month stays, on 1,000+ acres; likely Genesee County area (founder on Genesee County HT task force). Flintside (Nov 2020) described it then as a planned aftercare facility. No license info found in sources; the Michigan CCI online lookup could not be reached from this environment, so licensure not verified. No adverse findings found.",
+        "Location as listed: Likely Genesee County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 82), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 30,
+    "location_name": "MINNESOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Corrie's House",
+        "currentName": "",
+        "currentOperator": "Corrie's House",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Oakdale",
+        "state": "MN",
+        "country": "United States"
+      },
+      "location": "Oakdale, MN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Children's Residential Facility (Group Residential Setting, Shelter; certified for sex-trafficked/CSE youth); Minnesota Department of Human Services (Licensing); 1125108"
+      ],
+      "resourceLinks": [
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_473673",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Active since May 2025; capacity 6; ages 12-17, any gender; Oakdale (Washington County).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 91), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 30,
+    "location_name": "MINNESOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Evergreen Youth Crisis Shelter",
+        "currentName": "",
+        "currentOperator": "Evergreen Youth & Family Services",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Bemidji",
+        "state": "MN",
+        "country": "United States"
+      },
+      "location": "Bemidji, MN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Children's Residential Facility (Shelter Services; certified for sex-trafficked/CSE youth); Minnesota Department of Human Services (Licensing); 800759"
+      ],
+      "resourceLinks": [
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_471887",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Active; capacity 10; ages 9-17, any gender; Bemidji (Beltrami County); licensed since 1977. No maltreatment memos posted. Severity of 2023 order unknown.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 92), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 9,
+    "location_name": "MISSOURI",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Residential treatment home – The Covering House",
+        "currentName": "",
+        "currentOperator": "The Covering House",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Dittmer",
+        "state": "MO",
+        "country": "United States"
+      },
+      "location": "Dittmer, MO",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Licensed residential care facility (basic care and residential treatment); Joint Commission accredited; Missouri Department of Social Services, Children's Division (residential care licensing)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://test.dss.mo.gov/provider-services/children/docs/licensed-residential-facility-listing.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dss.mo.gov/cd/keeping-kids-safe/resource-guide.htm",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Missouri DSS licensed residential facility listing: The Covering House, Dittmer (Jefferson Co.), capacity 6, female ages 12-21. Missouri DSS caregiver resource guide calls it a residential facility for girls 12-21, 'licensed and contracted with CD'. Missouri Times and Leader reported plans to expand with a second campus. Missouri Children's Division does not post facility inspection or investigation results online; two searches found no abuse/neglect findings, lawsuits or news investigations.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 113), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 45,
+    "location_name": "MISSISSIPPI",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Sunrise Safe Home",
+        "currentName": "",
+        "currentOperator": "Southern Christian Services for Children and Youth",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MS",
+        "country": "United States"
+      },
+      "location": "MS",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Mississippi Department of Child Protection Services (MDCPS) — congregate care licensing"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://attorneygenerallynnfitch.com/wp-content/uploads/2026/04/2026HTFundAnnouncement-3.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://mdcps.ms.gov/sites/default/files/RFP_Notice%20of%20Intent%20to%20Award%20Congregate%20Care%202-14-2025.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Mississippi Attorney General's 2026 Human Trafficking Fund announcement: Southern Christian Services got $239,215.50 to continue operating Mississippi's safe home reserved solely for young trafficking survivors (therapy up to two years), with Sunnybrook Children's Home collaborating. Southern Christian Services was on MDCPS's Feb 2025 congregate care notice of intent to award, which implies an MDCPS-licensed provider but license number/type for the safe home were not found. Listed as Youth & Adults; AG release says adolescents plus therapy for caregivers. No adverse findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 109), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 12,
+    "location_name": "NORTH CAROLINA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Magnolia Hope",
+        "currentName": "",
+        "currentOperator": "Falcon Children's Home and Family Services",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NC",
+        "country": "United States"
+      },
+      "location": "NC",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential Child Care (agency also licensed for Independent Living Residential Services, Adolescent Parent & Child Residential Services, Emergency Shelter Care); NC DHHS Division of Social Services, Child Welfare Licensing (Residential Child Care); Agency main campus B00013 (cap. 90). Magnolia Hope not listed by name; likely candidate is 'Ben's House' B16136, undisclosed location, cap. 6, females 6-21 (unconfirmed match)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.ncdhhs.gov/residential-child-care-facilities-4-04-25/open",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://nccourts.gov/assets/inline-files/NCHTC-Resource-Directory-20250314.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "NC DHHS residential child care facility list (updated 4/4/2025) lists Falcon Children's Home (Cumberland Co.) with sites B00013, Whitfield West B10287 (12, F), Whitfield East Wing A B14815 (6, F 17-21), Wing B B10289 (16), Ben's House B16136 (6, F, undisclosed). NC Human Trafficking Commission directory (Mar 2025) lists Falcon Children's Home-Magnolia Hope: female sex-trafficking victims 11-18, emergency shelter and 12-24 month housing, statewide. License list gives no status/expiration. One news search found no abuse/safety findings.",
+        "Location as listed: Cumberland County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 133), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 12,
+    "location_name": "NORTH CAROLINA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Restoration Village",
+        "currentName": "",
+        "currentOperator": "Present Age Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NC",
+        "country": "United States"
+      },
+      "location": "NC",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.ncdhhs.gov/residential-child-care-facilities-4-04-25/open",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://nccourts.gov/assets/inline-files/NCHTC-Resource-Directory-20250314.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://impala.digital/public/profiles/45-1728287/programs",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Not on NC DHHS residential child care facility list (4/4/2025). NCHTC directory (Mar 2025) lists Present Age Ministries (Concord) for female adolescent survivors under 18 with counseling, case management, in-home visits etc. - residential not stated; a separate entry says Cabarrus Dream Center provides housing for Present Age. 2023 990 data describe 'Hannah's Heart Housing Program' as wrap-around services for a child living with a parent/foster/guardian (family-based, not a group home). 'Restoration Village' not found in any source opened - may be planned. No findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 134), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 360,
+    "location_name": "NORTH DAKOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Emergency shelter and trafficking services – Youthworks",
+        "currentName": "",
+        "currentOperator": "Youthworks",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Minot",
+        "state": "ND",
+        "country": "United States"
+      },
+      "location": "Minot, ND",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Certified shelter care program; North Dakota Health and Human Services (shelter care certification)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.nd.gov/dhs/policymanuals/60705/Content/PIs/PI%2023-03%20Certified%20Shelter%20Care%20.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "ND DHS policy issuance PI 23-03 (2023-01-13) lists Youthworks, Minot, as a certified shelter care program for 5 youth ages 10-17. Youthworks also runs trafficking services in Bismarck and Fargo; News Co-op ND describes its trafficking work as non-residential services. No adverse findings or news found.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 138), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 19,
+    "location_name": "NEVADA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "CSEC residential homes – Eagle Quest",
+        "currentName": "",
+        "currentOperator": "Eagle Quest",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NV",
+        "country": "United States"
+      },
+      "location": "NV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Foster care agency / specialized foster homes; Clark County Department of Family Services (agency and each home licensed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://leg.state.nv.us/Audit/Full/BE2022/LA22-10%20Governmental%20and%20Private%20Facilities%20for%20Children%20-%20December%202021.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.clarkcountynv.gov/news/news-detail-t28-r853",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Las Vegas private foster care agency (max capacity 234, avg 191 in FY2025 per LA26-11 audit, not inspected that cycle). Clark County approved ~$1.5M contract Feb 7, 2023 for specialized foster homes for sexually exploited girls 11-17 (with St. Jude's, 18 girls combined). These are licensed foster homes rather than a group facility; individual CSEC home names not public.",
+        "Location as listed: Las Vegas (agency).",
+        "Listed as: Foster care agency with specialized homes for sexually exploited girls. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 123), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 33,
+    "location_name": "OHIO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Girls' residential home – Safe Harbor Ohio",
+        "currentName": "",
+        "currentOperator": "Safe Harbor Ohio",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "OH",
+        "country": "United States"
+      },
+      "location": "OH",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://ideastream.org/health/2024-08-30/child-survivors-of-sex-trafficking-have-a-new-refuge-in-holmes-county",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Ideastream (Aug 30, 2024): Holmes County campus, girls 14-18, 12 beds in three cottages, first residents ~July 2024, planned expansion to 25. No license information found; no adverse findings found.",
+        "Location as listed: Holmes County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 144), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 33,
+    "location_name": "OHIO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Therapeutic group home – Gracehaven",
+        "currentName": "",
+        "currentOperator": "Gracehaven",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "OH",
+        "country": "United States"
+      },
+      "location": "OH",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Therapeutic group home (per MinistryWatch: 'state-licensed therapeutic group homes'); Ohio state license (agency not named in source; Ohio residential child care is licensed by ODJFS/now Ohio Department of Children and Youth)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://ministrywatch.com/gracehaven-wins-settlement-in-ohio-foster-care-dispute/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Ohio AG victim-services listing: serves trafficking survivors ages 10-20 with residential programs for youth; Columbus office. No abuse/neglect findings found. Ohio has no public online residential license lookup reachable here, so license number/capacity not obtained.",
+        "Location as listed: Columbus (office).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 141), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 33,
+    "location_name": "OHIO",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Youth crisis shelter – Huckleberry House",
+        "currentName": "",
+        "currentOperator": "Huckleberry House",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Columbus",
+        "state": "OH",
+        "country": "United States"
+      },
+      "location": "Columbus, OH",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Runaway/homeless youth crisis shelter (Teen Crisis Program, ages 12-17); licensing not stated"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://huckhouse.org/crisis-shelter/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Columbus shelter for teens 12-17, typical stay 4-7 days, longer via Franklin County Children Services respite/emergency shelter partnership. Also housing programs for ages 18-24. Short-term crisis shelter, not a CSEC-specific long-term home. No adverse findings found in news searches.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 142), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 46,
+    "location_name": "SOUTH CAROLINA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Residential program – Doors to Freedom",
+        "currentName": "",
+        "currentOperator": "Doors to Freedom",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "SC",
+        "country": "United States"
+      },
+      "location": "SC",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: SC HT Task Force Safe House Certification: Minors Program - Gold; Transitional Age Youth Program - Gold (list rev. 03/2026); SC Human Trafficking Task Force (Attorney General's Office) safe house certification - this is a voluntary quality certification, not a DSS license; SC DSS group home license not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.scag.gov/media/j1oj0rje/safehouseprogram_03-26.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.scag.gov/human-trafficking/victim-survivor-services/",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.scag.gov/about-the-office/news/the-south-carolina-human-trafficking-task-force-congratulates-doors-to-freedom-for-opening-south-carolina-s-only-safe-home-for-underage-victims-of-sex-trafficking/",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Certified list; Task Force services page lists it under Dorchester County, 'Safe House Certified (2025)'. Opened 2018 as SC's only safe home for underage sex-trafficking victims, females 12-20, undisclosed Lowcountry location (SC AG release, Apr 9, 2018). SC DSS has no public group home license lookup found. No findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 154), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 8,
+    "location_name": "TENNESSEE",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Garland Oaks",
+        "currentName": "",
+        "currentOperator": "Street Hope TN",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TN",
+        "country": "United States"
+      },
+      "location": "TN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wbir.com/article/news/community/east-tennessee-nonprofit-opening-first-safe-home-for-child-survivors-of-sex-trafficking/51-a767e702-cdc4-49c1-b4f3-593c547b019d",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.wate.com/news/top-stories/east-tennessee-center-provides-safety-and-support-for-teen-victims-of-sex-trafficking/amp/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Street Hope TN runs Garland Oaks, a 10-bedroom safe home in East Tennessee (Knoxville area) for girls 12-17 who survived sex trafficking. WBIR says many residents come from DCS. WATE (about 2025-11-24) says it is the region's only safe house for trafficked girls. Neither article says whether Tennessee DCS licenses it. No adverse findings found.",
+        "Location as listed: Knoxville area.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 161), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 4,
+    "location_name": "TEXAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Bob's House of Hope youth transitional living program",
+        "currentName": "",
+        "currentOperator": "Ranch Hands Rescue",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TX",
+        "country": "United States"
+      },
+      "location": "TX",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.keranews.org/news/2026-07-30/justin-area-nonprofit-opens-new-home-for-unhoused-teens-at-bobs-house-of-hope",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "KERA News (2026-07-30): a new 4-bedroom home for unhoused teens 14-17 opened at Bob's House of Hope near Justin (Denton County), stays up to 90 days; separate boys' and girls' homes due to be completed; residents need not be trafficking survivors. Article does not say how it is licensed; HHSC licensing not checked (a 24-hr home for minors would normally need an HHSC GRO/emergency-shelter permit, worth verifying). Bob's House of Hope previously served adult trafficked men.",
+        "Location as listed: Near Justin (Denton County).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 172), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 4,
+    "location_name": "TEXAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Emerging Grace Ministries",
+        "currentName": "",
+        "currentOperator": "",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TX",
+        "country": "United States"
+      },
+      "location": "TX",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "General Residential Operation - Residential Treatment Center (treatment services: emotional disorders, autism spectrum disorder; program services: child care, transitional living); girls 12-17; Texas HHSC Child Care Regulation; Operation No. 1793844 (Full Permit issued 06/02/2025, renewal due 06/02/2027, no conditions); capacity 8"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://childcare.hhs.texas.gov/Public/OperationDetails?operationId=1473501&resCareFlag=true",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Read on HHSC Search Texas Child Care (JS app; URL may need to be opened in a browser). Organization bought a 7-acre Montgomery County property in 2023 for the program (Stroll magazine profile). Recommend opening 'View Full Compliance History' to see the 26 deficiencies' risk levels and any abuse/neglect investigation findings.",
+        "Location as listed: Montgomery County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 167), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 28,
+    "location_name": "VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safehome – The Lampstand",
+        "currentName": "",
+        "currentOperator": "Straight Street Roanoke Valley / The Lampstand",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "VA",
+        "country": "United States"
+      },
+      "location": "VA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Virginia DSS Division of Licensing Programs presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.wsls.com/news/local/2025/01/30/human-trafficking-in-southwest-virginia-local-nonprofit-tackling-growing-crisis",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.wdbj7.com/2022/03/03/muralist-donates-time-talent-virginias-only-safe-home-exploited-children/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Operated as The Lampstand (Roanoke Valley); sources opened do not mention 'Street Ransom'. WSLS (Jan 29, 2025): safe home for girls 12-17 who were sexually exploited/trafficked, eight rooms, described as the only facility of its kind in Virginia. WDBJ (Mar 3, 2022): 90-day trauma-informed program preparing to open. No license info in either source; VDSS search not checked (form). No findings found.",
+        "Location as listed: Roanoke Valley.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 183), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 28,
+    "location_name": "VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "The Hallow",
+        "currentName": "",
+        "currentOperator": "Samaritan House",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Virginia Beach",
+        "state": "VA",
+        "country": "United States"
+      },
+      "location": "Virginia Beach, VA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Virginia DSS Division of Licensing Programs (children's residential facility) presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://13newsnow.com/article/news/local/mycity/virginia-beach/live-in-shelter-for-youth-human-trafficking-victims-opens-in-virginia-beach/291-4479405a-c01a-4ab6-bc4f-a84c1e1ac044",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://dss.virginia.gov/files/division/licensing/crf/intro_page/status_initial/2024-11-06.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "13News Now: 'The Hallow by Samaritan House', Virginia Beach, live-in shelter for youth trafficking victims under 18, up to 8 residents, 24/7 staff, placements through state services (opening ribbon-cutting; article date not shown). Groundbreaking was Dec 2022 (search results). No license info in the article; not named in the VDSS CRF status broadcasts opened (Sep 2024, Nov 2024, Jul 2026), which only list initial applications, expirations, provisionals and denials. VDSS facility search needs a form submission, so the license number was not checked. No findings found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 182), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 29,
+    "location_name": "WASHINGTON",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Bremerton youth shelter – The Coffee Oasis",
+        "currentName": "",
+        "currentOperator": "The Coffee Oasis",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Bremerton",
+        "state": "WA",
+        "country": "United States"
+      },
+      "location": "Bremerton, WA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Youth shelter (6 beds, ages 16-20, up to 30 days)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://find-human-services.kingcounty.gov/search/a807091f-2821-54fb-aca5-020d438c3cf3",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Oasis Hope Home Youth Shelter, Bremerton: 6 beds, male and female 16-20, up to 30 consecutive days, parents contacted within 72 hours (King County resource directory). Serves 18-20 year olds too. DCYF licensing (e.g., overnight youth shelter) not confirmed. No findings located.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 187), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 29,
+    "location_name": "WASHINGTON",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Tacoma Loft youth shelter – The Coffee Oasis",
+        "currentName": "",
+        "currentOperator": "The Coffee Oasis",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Tacoma",
+        "state": "WA",
+        "country": "United States"
+      },
+      "location": "Tacoma, WA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Youth shelter (12 beds, ages 13-17)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://find-human-services.kingcounty.gov/search/9ec4c0e1-41ea-5726-8f44-43aa476169c9",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "The Loft Youth Shelter, Tacoma: 12 beds, ages 13-17 (King County directory). Minors' shelters in WA normally need DCYF licensing (HOPE center / youth shelter) but no license record confirmed. No findings located.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 188), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 22,
+    "location_name": "WISCONSIN",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safe Haven I",
+        "currentName": "",
+        "currentOperator": "Grateful Girls, Inc.",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WI",
+        "country": "United States"
+      },
+      "location": "WI",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Group home; Wisconsin Department of Children and Families (Child Welfare Licensing); eWiSACWIS provider # 8059657"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://dcf.wisconsin.gov/child-welfare-licensing/wisconsin-group-home-rates",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Listed on DCF's 2026 group home rate table as 'Grateful Girls Safe Haven'. Urban Milwaukee (2015-10-01) described it as a state-licensed six-bed Milwaukee group home for young women 15-21. DCF does not publish group home inspection/compliance records online (directory only on request), so no findings could be checked; no adverse news found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 191), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 22,
+    "location_name": "WISCONSIN",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safe Haven II",
+        "currentName": "",
+        "currentOperator": "Grateful Girls, Inc.",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WI",
+        "country": "United States"
+      },
+      "location": "WI",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Group home; Wisconsin Department of Children and Families (Child Welfare Licensing); eWiSACWIS provider # 8066284"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://dcf.wisconsin.gov/child-welfare-licensing/wisconsin-group-home-rates",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Listed on DCF's 2026 group home rate table as 'Grateful Girls Safe Haven II'. Capacity/ages not published. DCF compliance records not online; no adverse news found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 192), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Arthur N. Gustke Child Shelter",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Davis Child Shelter",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Greenbrier Valley Children's Home",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Hovah Hall Underwood Children's Home",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "June Montgomery Harless Children's Home",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Kathleen & John Faltis Child Shelter",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Matthew Pack Children's Home",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 47,
+    "location_name": "WEST VIRGINIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Romney Child Shelter",
+        "currentName": "",
+        "currentOperator": "Children's Home Society of West Virginia",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WV",
+        "country": "United States"
+      },
+      "location": "WV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Emergency child shelters; WV Department of Human Services (formerly DHHR) child residential licensing presumed - not confirmed"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://wvrecord.com/stories/510590102-dhhr-children-s-home-hit-with-sexual-abuse-lawsuit",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://childhswv.org/programs-services/emergency-shelters/",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "One of eight emergency child shelters run by Children’s Home Society of West Virginia. CHS WV lists eight emergency child shelters: Matthew Pack Children's Home, Davis Child Shelter, Kathleen & John Faltis Child Shelter, June Montgomery Harless Children's Home, Arthur N. Gustke Child Shelter, Romney Child Shelter, Hovah Hall Underwood Children's Home, Greenbrier Valley Children's Home. The page gives no ages, capacity, license, or trafficking-specific role. These are general crisis shelters, not CSEC-specific. The lawsuit is old and concerns transport, not a shelter.",
+        "Listed as: Youth emergency shelter. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 190), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 2,
+    "location_name": "CALIFORNIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Courage House NorCal",
+        "currentName": "",
+        "currentOperator": "Courage Worldwide",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "CA",
+        "country": "United States"
+      },
+      "location": "CA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Closed",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Group home (6 beds, girls); California DSS Community Care Licensing (CCL)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.newsreview.com/sacramento/content/absence-of-courage-anti-trafficking-charity-defends-itself-against-regulatory-violations-says-state-would-force-it-to-accept-satan/22892757",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.courageworldwide.org/united-states-locations",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Licensed 6-bed group home in Northern California (location undisclosed) for trafficked girls; stopped admissions June 2016 and never reopened as a minors' program. Courage Worldwide's own site says the California home closed. License number not found; CA CCLD facility search could not be reached from this environment.",
+        "Location as listed: Undisclosed, Northern California.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 10), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 9,
+    "location_name": "MISSOURI",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Residential treatment home – Oasis Refuge",
+        "currentName": "",
+        "currentOperator": "Oasis Refuge",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "Willard",
+        "state": "MO",
+        "country": "United States"
+      },
+      "location": "Willard, MO",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Closed",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Licensed residential care facility (basic care and residential treatment); Missouri Department of Social Services, Children's Division (residential care licensing)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://test.dss.mo.gov/provider-services/children/docs/licensed-residential-facility-listing.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Missouri DSS licensed residential facility listing (undated; hosted on a test.dss.mo.gov server): Oasis Refuge, Inc, Willard (Greene Co.), capacity 8, female ages 10-20. AG News describes a six-bedroom home near Springfield for trafficked girls 12-17, mostly placed by Children's Division. Missouri Children's Division does not post facility inspection or investigation results online; two searches found no abuse/neglect findings, lawsuits or news investigations.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 111), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 19,
+    "location_name": "NEVADA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Courage House Nevada",
+        "currentName": "",
+        "currentOperator": "Courage Worldwide",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NV",
+        "country": "United States"
+      },
+      "location": "NV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Closed",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Psychiatric Residential Treatment Facility (per operator; not verified on state lookup); Nevada DHHS / Division of Public and Behavioral Health (per operator)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.ourtownreno.com/our-stories-1/2026/8/31/former-board-member-richard-jay-courage-worldwide-fail-to-respond-amid-mounting-concerns-from-former-staff-and-parent",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.courageworldwide.org/united-states-locations",
+          "label": "",
+          "kind": "other",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Washoe County, 40-acre property; first resident April 9, 2026, 5 girls under 18. Property damaged in the Bug Fire. Operator's site now says the home closed (board authorized orderly closure; accreditation survey cancelled, blocking Medicaid). Same organization as the California Courage House cited 36 times by CA CCL (see Courage House NorCal).",
+        "Location as listed: Washoe County.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 122), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 10,
+    "location_name": "ARKANSAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Human Trafficking Treatment Center – The Centers",
+        "currentName": "",
+        "currentOperator": "The Centers",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "AR",
+        "country": "United States"
+      },
+      "location": "AR",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Child welfare agency residential licenses on the 12th Street Little Rock campus (Destiny House licensed as an emergency shelter; Elizabeth Mitchell Centers psychiatric residential treatment); license for the trafficking program itself not identified; Arkansas DHS — Child Welfare Agency Licensing Unit / Child Welfare Agency Review Board"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.arkansasonline.com/news/2021/jun/27/arkansas-psychiatric-site-sanctioned-over-its-care/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.arkansasonline.com/news/2021/jun/27/11-kids-caught-little-rock-facility-licensing-disp/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.pressreader.com/usa/arkansas-democrat-gazette/20210815/285314685279892",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://ovc.ojp.gov/funding/awards/15povc-23-gg-02760-mino",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Centers for Youth and Families (Little Rock) runs a Human Trafficking Treatment Program for minors; received a $950,000 FY2023 OVC grant for services including shelter/housing for minor trafficking victims. Which licensed building houses the trafficking program, its license number and capacity were not found; Arkansas DHS has no public online license lookup that was reached. The 2021 findings are for other units on the same campus/operator.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 7), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 11482,
+      "unique_name": "Centers for Youth and Families, Inc."
+    }
+  },
+  {
+    "location_id": 2,
+    "location_name": "CALIFORNIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Lena's House",
+        "currentName": "",
+        "currentOperator": "Restorative Pathways (formerly Ruby's Place)",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "CA",
+        "country": "United States"
+      },
+      "location": "CA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Group home (per CARF accreditation listing)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://carf.org/provider/lenas-house-407075/",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Hayward, CA; CARF lists Lena's House (parent Restorative Pathways) with a one-year accreditation for a Child & Youth Services group home. State license not confirmed (CCLD unreachable). No findings located.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 25), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 10201,
+      "unique_name": "Ruby’s Place Youth Village"
+    }
+  },
+  {
+    "location_id": 2,
+    "location_name": "CALIFORNIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "SafeHouse of the Desert youth emergency shelter",
+        "currentName": "",
+        "currentOperator": "Operation SafeHouse / SafeHouse of the Desert",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "CA",
+        "country": "United States"
+      },
+      "location": "CA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Youth emergency shelter"
+      ],
+      "resourceLinks": [],
+      "notes": [
+        "Thousand Palms, Riverside Co.; second shelter of Operation SafeHouse Inc. (Riverside nonprofit; youth 11-17, stays up to 3 weeks). No findings located; license not confirmed (CCLD unreachable).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 22), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 10112,
+      "unique_name": "Operation Safehouse"
+    }
+  },
+  {
+    "location_id": 20,
+    "location_name": "GEORGIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "House of Hope – Twin Cedars Youth and Family Services",
+        "currentName": "",
+        "currentOperator": "Twin Cedars Youth and Family Services",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "GA",
+        "country": "United States"
+      },
+      "location": "GA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Georgia DHS OIG Residential Child Care Licensing (Twin Cedars runs licensed residential campuses; House of Hope specifically not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://impala.digital/public/profiles/58-1413499/programs",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Twin Cedars (LaGrange GA, EIN 58-1413499) 990 data FY2023-24 lists residential services at Bradfield Center, Anne E. Shepherd Home and Georgia Industrial Children's Home, plus therapeutic foster care - no 'House of Hope' or CSEC-specific home listed. Could not confirm a CSEC 'House of Hope' program exists or is operating (an unrelated 'House of Hope Refuge of Love' org also exists in GA). One news search found no abuse findings for Twin Cedars campuses. RCC TRAILS unreachable from here.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 53), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 12558,
+      "unique_name": "Twin Cedars Youth & Family Services"
+    }
+  },
+  {
+    "location_id": 20,
+    "location_name": "GEORGIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Receiving Hope Center",
+        "currentName": "",
+        "currentOperator": "Wellspring Living",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "GA",
+        "country": "United States"
+      },
+      "location": "GA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Residential intake/assessment center for trafficked youth (license class not confirmed); Georgia DHS OIG Residential Child Care Licensing (presumed; not confirmed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.ajc.com/news/crime--law/georgia-set-open-first-residential-center-for-sex-trafficked-youths/H8wGmHteWsTyDdKhX8Xc2M",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://cjcc.georgia.gov/node/871",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Opened Feb 2020 in Paulding County: 20 private rooms, ages 12-17, 24/7 staff (AJC). Still listed by Georgia CJCC as the residential intake facility for trafficked youth 12-17. No license record checked (RCC TRAILS unreachable). Search turned up only routine Paulding County runaway alerts that could not be tied to the center - not counted as findings.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 55), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 12559,
+      "unique_name": "Wellspring Living Girls Residential"
+    }
+  },
+  {
+    "location_id": 34,
+    "location_name": "INDIANA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "IMPACT at Lutherwood",
+        "currentName": "",
+        "currentOperator": "Lutheran Child and Family Services / Ascent 121 / Community Health Network",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IN",
+        "country": "United States"
+      },
+      "location": "IN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Child Caring Institution (Lutherwood Residential Treatment Center) and Private Secure Facility (Lutherwood Secure RTC); Indiana Department of Child Services (DCS) residential licensing; CCI: facility no. 32095 (Resource ID 10000000011); PSF: 73545 (Resource ID 10000000087)"
+      ],
+      "resourceLinks": [],
+      "notes": [
+        "DCS Active Residential Licenses as of 2/2/2026: Lutherwood RTC, Marion County, CCI license 10/1/2024-9/30/2028 (capacity not legible in list); Lutherwood Secure RTC PSF capacity 58. The IMPACT CSEC program itself is not named in the license lists and its current operation was not confirmed. Ascent 121 is a non-residential Indianapolis survivor-services nonprofit (WTHR). No adverse findings about Lutherwood found in news searches; DCS does not publish facility investigation reports online that I could locate.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 65), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 100365,
+      "unique_name": "Lutherwood Residential Treatment"
+    }
+  },
+  {
+    "location_id": 34,
+    "location_name": "INDIANA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "TRU Harbor",
+        "currentName": "",
+        "currentOperator": "YOC",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IN",
+        "country": "United States"
+      },
+      "location": "IN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Child Caring Institution and Private Secure Facility (TRU Harbor described as a private secure residential treatment program); Indiana Department of Child Services (DCS) residential licensing; CCI: facility no. 33437 (Resource ID 10000000271); PSF: 73659 (Resource ID 10000000097)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://togetherthevoice.org/wp-content/uploads/2020/04/YOC-TruHarborStandaloneFlyer8.5x11email.pdf",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "DCS Active Residential Licenses as of 2/2/2026: Youth Opportunity Center, Delaware County (Muncie), CCI capacity 45 long-term + 21 emergency shelter, license 4/1/2025-3/31/2029; PSF capacity 68. YOC flyer: TRU Harbor opened 2018 for girls 11-18 confirmed as CSEC/trafficking victims, 1:4 staff ratio. Current TRU Harbor operation not confirmed. Listed as 'Youth & Adults' by partner but program is for minors. No adverse findings specific to YOC found in news searches.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 66), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 13374,
+      "unique_name": "Youth Opportunity Center"
+    }
+  },
+  {
+    "location_id": 34,
+    "location_name": "INDIANA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Welch program",
+        "currentName": "",
+        "currentOperator": "Bashor Children's Home",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "IN",
+        "country": "United States"
+      },
+      "location": "IN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Child Caring Institution (also separately licensed Private Secure Facility); Indiana Department of Child Services (DCS) residential licensing; CCI: facility no. 30123 (Resource ID 10000000272); PSF: 73601 (Resource ID 10000000056)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.wrtv.com/news/wrtv-investigates/hamilton-county-family-files-lawsuit-against-bashor-childrens-home-alleging-negligence",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://secure.in.gov/dcs/files/Active_Residential_Licenses-Child-Caring-Institution.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://secure.in.gov/dcs/files/Active_Residential_Licenses-PSF-Licenses.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "DCS Active Residential Licenses (as of 2/2/2026): 'Bashor Home of the United Meth Church', Elkhart County, CCI capacity 57 long-term + 8 emergency shelter, license 4/1/2024-3/31/2028. PSF list: capacity 31. Welch program not named separately in license lists. Court and outcome of 2021 suit not given in article.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 64), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 13295,
+      "unique_name": "Bashor Children’s Home"
+    }
+  },
+  {
+    "location_id": 32,
+    "location_name": "MICHIGAN",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Women and children transitional housing – Vista Maria",
+        "currentName": "",
+        "currentOperator": "Vista Maria",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MI",
+        "country": "United States"
+      },
+      "location": "MI",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Child caring institution (residential treatment for girls, Dearborn Heights) — the listed transitional housing program itself is not shown as licensed; Michigan DHHS Division of Child Welfare Licensing (for its residential CCI)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.clickondetroit.com/news/investigations/2025/09/04/inside-vista-maria-state-investigations-lead-to-more-violations-at-all-girls-treatment-facility",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://bridgemi.com/michigan-government/michigan-program-for-troubled-girls-is-closing-officials-fear-more-will-follow/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.clickondetroit.com/news/investigations/2025/12/30/vista-maria-lays-off-nearly-130-employees-ends-residential-program",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://clickondetroit.com/news/local/2026/04/13/house-of-horrors-6-former-residents-sue-vista-maria-allege-years-of-abuse-systemic-failures",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Findings relate to Vista Maria's Dearborn Heights girls' residential CCI, which closed to residents Dec 19, 2025. Whether the listed women-and-children transitional housing program continues was not confirmed; Vista Maria says independent living continues. Court name for the 2026 suit not given in the article. Michigan CCI online lookup not reachable here, so license number not obtained.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 84), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 13213,
+      "unique_name": "Vista Maria School for Girls"
+    }
+  },
+  {
+    "location_id": 30,
+    "location_name": "MINNESOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Brittany's Place",
+        "currentName": "",
+        "currentOperator": "180 Degrees",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MN",
+        "country": "United States"
+      },
+      "location": "MN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Children's Residential Facility (group residential, shelter, transitional; certified for sex-trafficked/CSE youth); Minnesota Department of Human Services (Licensing); 1074484"
+      ],
+      "resourceLinks": [
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_471878",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_471879",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Active; capacity 14; female ages 10-17; Ramsey County; initial license 2014. Matched to Brittany's Place by county/population/phone (DHS page lists holder name only). Separate 180 Degrees CRF 'Hope House' (1086169, Hennepin, 6 beds) is a different program. No maltreatment memos posted; no news found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 88), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 12989,
+      "unique_name": "180 Degrees Inc."
+    }
+  },
+  {
+    "location_id": 30,
+    "location_name": "MINNESOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Brittany's Place Transitional Living Program",
+        "currentName": "",
+        "currentOperator": "180 Degrees",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MN",
+        "country": "United States"
+      },
+      "location": "MN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Children's Residential Facility (Group Residential Setting, Shelter, Transitional Services tracks); Minnesota Department of Human Services (Licensing); 1074484"
+      ],
+      "resourceLinks": [
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_471878",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_471879",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "No separate license found for a 'transitional living' Brittany's Place. The 180 Degrees Inc CRF license 1074484 (Ramsey County, girls 10-17, capacity 14, certified for sex-trafficked/CSE youth) lists a Transitional Services track; matched to Brittany's Place by county, population and phone, not by name (DHS page does not print the program name). 180 Degrees' general Transitional Housing (MDH HelpMeConnect) serves ages 12-24 at a Minneapolis address; any 18+ component would not be under this license.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 87), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 12989,
+      "unique_name": "180 Degrees Inc."
+    }
+  },
+  {
+    "location_id": 30,
+    "location_name": "MINNESOTA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Winnie Sisu",
+        "currentName": "",
+        "currentOperator": "North Homes, Inc.",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MN",
+        "country": "United States"
+      },
+      "location": "MN",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Children's Residential Facility (Transitional Services; certified for sex-trafficked/CSE youth); Minnesota Department of Human Services (Licensing); 1084386"
+      ],
+      "resourceLinks": [
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_467285",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "http://www.dhs.state.mn.us/main/groups/licensinglookup/documents/licensinglookup/LLO_468600.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "http://www.dhs.state.mn.us/main/idcplg?IdcService=GET_DYNAMIC_CONVERSION&RevisionSelectionMethod=LatestReleased&dDocName=LLO_466831",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Active; capacity 6; female ages 16-21; 705 18th St NW, Bemidji. A 2016 DOC report exists for a related 'North Homes Girls Program-Winnie Way' (not opened).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 104), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 100465,
+      "unique_name": "North Homes"
+    }
+  },
+  {
+    "location_id": 9,
+    "location_name": "MISSOURI",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "ReHope Youth / Mabee Home",
+        "currentName": "",
+        "currentOperator": "REHOPE / Missouri Baptist Children's Home",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "MO",
+        "country": "United States"
+      },
+      "location": "MO",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://test.dss.mo.gov/provider-services/children/docs/licensed-residential-facility-listing.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "No 'Mabee Home' or ReHope youth home was found on the Missouri DSS licensed residential facility listing. That list does show three licensed MBCH Children and Family Ministries campuses (Byrne/Peculiar, 17 beds; Hutchens/Mt. Vernon, 28; Lowe-Frill/Bridgeton, 24; ages 0/6-21), but none is tied to ReHope. ReHope itself (Harrisonville; KCTV5, 2023-06-06; DSS caregiver resource guide) is a campus for adult women, age 18+, so it is not a youth home. Whether a separate ReHope youth home exists was not confirmed. Missouri Children's Division does not post facility inspection or investigation results online; two searches found no abuse/neglect findings, lawsuits or news investigations.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 112), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 100693,
+      "unique_name": "Missouri Baptist Children’s Home"
+    }
+  },
+  {
+    "location_id": 19,
+    "location_name": "NEVADA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Healing Center",
+        "currentName": "",
+        "currentOperator": "St. Jude's Ranch for Children",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NV",
+        "country": "United States"
+      },
+      "location": "NV",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Foster care agency; campus houses licensed individually by county; Clark County Department of Family Services (homes licensed individually)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://bouldercityreview.com/news/its-in-those-small-moments-when-you-see-hope-rising-100331/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Boulder City 10-acre campus for child sex-trafficking survivors, grand opening Oct 30, 2024 (KTNV), designed for up to ~60; as of June 2025 one of five houses was county-licensed and its school served 7 girls (Boulder City Review). Agency listed in Nevada Legislative Auditor LA26-11 (FY2025) directory, not inspected. No findings located for the Healing Center (older 1999 Las Vegas Sun controversy concerns the agency generally, not reviewed).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 124), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 100105,
+      "unique_name": "St. Jude’s Ranch for Children (NV)"
+    }
+  },
+  {
+    "location_id": 14,
+    "location_name": "NEW YORK",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Gateways residential foster care",
+        "currentName": "",
+        "currentOperator": "JCCA",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "NY",
+        "country": "United States"
+      },
+      "location": "NY",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: NY OCFS (expected; JCCA is a licensed voluntary foster care agency — not verified for Gateways)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://westchester.news12.com/local-officials-call-on-state-to-close-jcca-westchester-campus-in-pleasantville-citing-dangerous-conditions",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://www.propublica.org/article/pleasantville-cottage-campus-new-york",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://westchester.news12.com/2025/07/09/7-lawsuits-detailing-sex-abuse-allegations-filed-against-multiple-entities-including-pleasantville-cottage-school/4k4t6huiW3Ct6h0KHUArI2",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Gateways is JCCA's program for sexually abused/exploited youth; JCCA's site lists one administrator for 'Pleasantville Cottage School & Gateways Program', suggesting it is on or tied to the Pleasantville campus, but I did not find a source confirming Gateways' location, capacity, or current operation. Findings are about the Pleasantville campus generally, not specifically Gateways. NY OCFS has no public facility inspection lookup that I could reach.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 131), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 12071,
+      "unique_name": "JCCA Pleasantville Cottage School"
+    }
+  },
+  {
+    "location_id": 11,
+    "location_name": "PENNSYLVANIA",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Safe House – VisionQuest",
+        "currentName": "",
+        "currentOperator": "VisionQuest",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "PA",
+        "country": "United States"
+      },
+      "location": "PA",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Pennsylvania DHS (expected)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://law.com/thelegalintelligencer/2023/05/16/emerging-abuse-litigation-against-visionquest-joins-similar-mass-actions-against-juvenile-treatment-centers-in-pa",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://whyy.org/articles/pennsylvania-juvenile-detention-lawsuits/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Could not find any public source confirming a VisionQuest 'Safe House' CSEC program in Pennsylvania, its location, or that it is operating. Lawsuits are against VisionQuest broadly, not this program. PA DHS directory not queried (search form).",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 152), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 365,
+    "location_name": "RHODE ISLAND",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Wilson House",
+        "currentName": "",
+        "currentOperator": "Family Service of Rhode Island",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "RI",
+        "country": "United States"
+      },
+      "location": "RI",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Unknown",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Trauma Systems Therapy (TST) short-term residential, ages 12-17; RI DCYF (contracted residential group care; licensing not stated)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://dcyf.ri.gov/sites/g/files/xkgbur416/files/documents/behavioral-health/ServiceProviderGuide-Update-2018_ResidentialGroupCareServices.pdf",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "DCYF 2018 Residential Group Care provider guide lists FSRI 'Wilson' TST Residential, ages 12-17, statewide; job postings place Wilson House in Rumford RI. No current status, capacity or license number found. Not to confuse with Community Care Alliance's Wilson House (Pawtucket, adult substance use). Unrelated: FSRI picked in April 2026 to run DCYF's new 16-bed Exeter girls' treatment center (Rhode Island Current). A 2019 federal case involved a supervisor at an unnamed Pawtucket DCYF-contracted group home trafficking a 17-year-old; operator not named, so not attributed here. No adverse findings specific to Wilson House found.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 153), checked by KOP against public sources in November 2026."
+      ]
+    }
+  },
+  {
+    "location_id": 4,
+    "location_name": "TEXAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Braselton Home",
+        "currentName": "",
+        "currentOperator": "New Life Refuge Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TX",
+        "country": "United States"
+      },
+      "location": "TX",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "General Residential Operation (per DFPS residential contract list); Texas HHSC Child Care Regulation (license); DFPS (contract)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://dfps.texas.gov/Doing_Business/Purchased_Client_Services/Residential_Child_Care_Contracts/active_contracts.asp",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        },
+        {
+          "url": "https://gov.texas.gov/organization/cjd/child-sex-trafficking-heal",
+          "label": "",
+          "kind": "government",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "DFPS active residential contracts page lists New Life Refuge Ministries as a GRO (basic child care and multiple services), 116 County Road 312, Beeville. Office of the Governor CJD lists it as a grant-funded long-term residential program. An HHSC name search for 'New Life' did not return it (operation may be listed under a different name), so operation number and compliance history not obtained. Whether 'Braselton Home' and 'Valero Home' are separate permitted operations is unclear. No news of abuse/safety problems found in 2 searches.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 170), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 10846,
+      "unique_name": "New Life Refuge Ministries"
+    }
+  },
+  {
+    "location_id": 4,
+    "location_name": "TEXAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "The Haven survivor residence",
+        "currentName": "",
+        "currentOperator": "Home of Hope Texas / The Haven",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TX",
+        "country": "United States"
+      },
+      "location": "TX",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Closed",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: no license record was found in public sources (checked November 2026)."
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.simmonsandfletcher.com/blog/meet-houston-missions-the-haven/",
+          "label": "",
+          "kind": "news",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Houston-area Christian residential home for girl survivors of trafficking (4 girls for 9-12 months; 24 served since Sept 2020). An update dated 12/22/2025 on a Simmons & Fletcher law-firm community blog post says The Haven would close 12/31/2025 due to loss of grants, not an official or news source, so closure should be treated as likely but unconfirmed. HHSC license not checked.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 168), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 10785,
+      "unique_name": "Home of Hope Texas"
+    }
+  },
+  {
+    "location_id": 4,
+    "location_name": "TEXAS",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Valero Home",
+        "currentName": "",
+        "currentOperator": "New Life Refuge Ministries",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "TX",
+        "country": "United States"
+      },
+      "location": "TX",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "General Residential Operation (per DFPS residential contract list); Texas HHSC Child Care Regulation (license); DFPS (contract)"
+      ],
+      "resourceLinks": [],
+      "notes": [
+        "See Braselton Home entry; same organization. Operation number and compliance history not obtained.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 171), checked by KOP against public sources in November 2026."
+      ]
+    },
+    "home_of": {
+      "id": 10846,
+      "unique_name": "New Life Refuge Ministries"
+    }
+  },
+  {
+    "location_id": 37,
+    "location_name": "WYOMING",
+    "provenance_source": "The Teen Project CSEC home list, checked by KOP, Nov 2026",
+    "facility": {
+      "identification": {
+        "name": "Youth crisis shelter – Youth Crisis Center",
+        "currentName": "",
+        "currentOperator": "Youth Crisis Center",
+        "currentOwner": "",
+        "currentOwners": [],
+        "otherNames": [],
+        "pastNames": [],
+        "knownReferrers": []
+      },
+      "locationDetails": {
+        "city": "",
+        "state": "WY",
+        "country": "United States"
+      },
+      "location": "WY",
+      "operatingPeriod": {
+        "startYear": null,
+        "endYear": null,
+        "status": "Open",
+        "notes": []
+      },
+      "facilityDetails": {
+        "type": "",
+        "gender": ""
+      },
+      "licensing": [
+        "Not confirmed: Youth emergency shelter and group home; Wyoming Department of Family Services (presumed)"
+      ],
+      "resourceLinks": [
+        {
+          "url": "https://www.causeiq.com/organizations/youth-crisis-center",
+          "label": "",
+          "kind": "reference",
+          "source": "The Teen Project CSEC home list"
+        }
+      ],
+      "notes": [
+        "Assumed to be Youth Crisis Center Inc., Casper (Natrona County): emergency crisis shelter for children from infancy to 17 plus long-term adolescent group home, with on-site case managers and mental health care; FY2025 revenue about $2.0M (CauseIQ profile,830270428/). Not to be confused with the Cheyenne youth crisis center that was placed inside the county juvenile detention center in 2015 (Wyoming Public Media). State license not confirmed. No findings located in 2 searches.",
+        "Listed as: Residential home for trafficking (CSEC) survivors. Added 2026-11-27 from The Teen Project's list of homes for commercially sexually exploited children (list no. 197), checked by KOP against public sources in November 2026."
+      ]
+    }
   }
 ]
