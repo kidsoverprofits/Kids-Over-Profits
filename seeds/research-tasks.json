@@ -37074,7 +37074,7 @@
     }
    ],
    "answer": {
-    "text": "The owner pointed to the archived Brown Schools pages (2026-11-27); the session that filed this had searched the media library by title only. The 2002 page does not list the seven settings by name. The end of the contract (July 2004) rests on KOP's corporatization page alone (https://kidsoverprofits.org/corporatization/); a primary source for it is still wanted. On record 10605 the link stays, as past; proposed wording for the record: 'The Brown Schools (education services, 1999-2004)'. Neither archive page is in the media library as a PDF yet.",
+    "text": "The owner pointed to the archived Brown Schools pages and to the source the corporatization page cites (2026-11-27); the session that filed this had not read either. Youth Today (Martha Shirk, May 1, 2005) is the source KOP's corporatization page cites for July 2004, and KOP holds it as news submission 11182. The 2002 page does not list the seven settings by name. On record 10605 the link stays, as past; wording for the record: 'The Brown Schools (education services, 1999-2004)'. Neither archive page is in the media library as a PDF yet.",
     "claims": [
      {
       "claim": "The Brown Schools ran the school at Letot Center, not the center itself: Dallas County chose it to provide education services at seven juvenile facilities, Letot Center among them, starting September 1, 1999",
@@ -37085,6 +37085,11 @@
       "claim": "In 2002 the program was called the Dallas County Juvenile Justice Charter Schools, a Brown Schools public education program, in seven placement settings",
       "url": "https://web.archive.org/web/20020806132621/http://brownschools.com:80/dallascounty.html",
       "quote": "A Brown Schools public education program ... serves pre- and post-adjudicated youth, ages 10-17, who are placed with the Dallas County Juvenile Probation Department. The program serves over 500 students daily in seven diverse placement settings."
+     },
+     {
+      "claim": "The Brown Schools lost the Dallas contract in July 2004",
+      "url": "https://youthtoday.org/2005/05/how-brown-sank-to-red/",
+      "quote": "The company refinanced again last July. That same month, it lost a lucrative contract to operate schools for detained juveniles in Dallas."
      }
     ],
     "by": "Claude",
@@ -37228,5 +37233,5 @@
    "directions": []
   }
  ],
- "built": "2026-11-27 16:31"
+ "built": "2026-11-27 16:39"
 }
