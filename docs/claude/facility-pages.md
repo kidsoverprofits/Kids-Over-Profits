@@ -18,6 +18,13 @@ php scripts/test-facility-pages.php
 # Pick next (owner, 2026-11-23: search every program/company page by name, other name, city, state code, company or id,
 # with news and lawsuit counts; Flag puts it on kop_ar_next() in the owner's order, with a note; a rewrite coming in takes the flag off),
 # With Claude (the owner's flags first, then sent back, or waiting: held facts or a change), Published (each with Undo, which restores About, facts, quotes).
+# Company histories (owner, 2026-11-27): every company whose history is a draft (historyStatus 'draft', kop_ar_history_drafts()),
+# with its text, sources and review notes; Publish / Undo only flip historyStatus through the pencil's own save
+# (kop_ie_operator_save(), operator:<id>:history), so the page and caches refresh as from the pencil.
+# Older AI drafts (owner, 2026-11-27): write-up drafts that are not Claude's rewrites (no 'kind', by 'ai', the hourly drafts before
+# 2026-11-13; facilities only, newest row per record, kop_ar_older_drafts()), beside the page's About now; Publish as written is
+# kop_wu_publish() (Undo kop_wu_undo(), the Review inbox write-up path), Send to Claude flags it on Pick next with a note
+# (records with a page only). A rewrite coming in takes it off the tab.
 # Picking a batch: write the owner's flags first, top down, before anything else (the note says what to focus on).
 # /about-rewrites (.claude/skills/about-rewrites/SKILL.md): list, find, flag/unflag/move from chat, and `work [N]` runs the batch on the flags.
 (kop-pipeline) python -I scripts/about-rewrite/pick.py list|find <words>|flag f123 --note ..|unflag|move f123 top   # REST kop/v1/writeups/find and /writeups/flag (research key)
@@ -25,6 +32,7 @@ php scripts/test-facility-pages.php
 (kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py --list            # what to write next, and the owner's notes on sent-back ones
 (kop-pipeline) python -I scripts/about-rewrite/send-rewrites.py <rec.json ...>    # send finished rewrites as drafts (pilot shape + "page")
 php -d extension=pdo_sqlite -d extension=mbstring -d memory_limit=3G scripts/test-about-rewrites.php   # save, answer, publish, undo, send back, company quotes, Pick next search and flags
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-about-rewrites-tabs.php   # Company histories + Older AI drafts tabs, no mirror needed
 # A citation with no address links our Woodbury issue copy, the wiki page or a HEAL capture another record gives (kop_facility_pages_cite_url())
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-profile-notes.php [--list] [--id=10347]   # rules on real lines, every record of the mirror
 # Citations on those pages read as a small "source" link and nothing more: one that only points back to us (the network map, a page of

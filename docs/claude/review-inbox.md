@@ -317,7 +317,7 @@ php -d extension=pdo_sqlite -d extension=mbstring scripts/test-review-inbox.php 
 
 Write-ups are reviewed at KOP Tools > About rewrites now, and Claude writes every one (docs/claude/facility-pages.md,
 "Claude writes every page's About"). The inbox's Write-ups queue is switched off (inc/review-inbox/writeups.php returns
-no source unless `$GLOBALS['kop_rinbox_writeups_in_inbox']` is set). GET kop/v1/writeups/claude (research key) lists what
+no source unless `$GLOBALS['kop_rinbox_writeups_in_inbox']` is set). The older AI drafts that queue held are on About rewrites > Older AI drafts (2026-11-27). GET kop/v1/writeups/claude (research key) lists what
 Claude should write next, the owner's Pick next flags first (`?flagged=1` for only those); POST takes a rewrite ({"page" | "facility_id" | "operator_id", "rewrite": {...}}) as the draft.
 
 ## One record

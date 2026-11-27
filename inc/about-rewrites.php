@@ -701,3 +701,98 @@ function kop_ar_flagged_rows() {
     }
     return $out;
 }
+
+/* ---- Company histories: drafts waiting on /operator/ pages (Company histories tab) ------------------------------ */
+
+/**
+ * Every company whose written history is a draft (operator.historyStatus anything but 'published', with paragraphs;
+ * inc/operator-history.php): [{id, name, url, alias_of, paragraphs, sources: [{label, url}], notes}], by name. The
+ * same drafts an admin sees under the banner on each /operator/<slug>/ page, listed in one place (owner, 2026-11-27).
+ */
+function kop_ar_history_drafts() {
+    global $wpdb;
+    if (!function_exists('kop_operator_history_written')) return array();
+    $idx = function_exists('kop_operator_pages_index') ? kop_operator_pages_index() : array();
+    $out = array();
+    $rows = (array) $wpdb->get_results('SELECT id, name, json_data FROM `' . $wpdb->prefix . "kop_operators` WHERE json_data LIKE '%\"history\"%'", ARRAY_A);
+    foreach ($rows as $r) {
+        $json = json_decode((string) $r['json_data'], true);
+        $op = is_array($json) && is_array($json['operator'] ?? null) ? $json['operator'] : null;
+        if (!$op) continue;
+        $h = kop_operator_history_written($op, true);
+        if (!$h || $h['status'] !== 'draft') continue;
+        $id = (int) $r['id'];
+        $out[] = array(
+            'id'         => $id,
+            'name'       => isset($idx['ids'][$id]) ? kop_ar_name('operator', $id) : (string) $r['name'],
+            'url'        => function_exists('kop_operator_page_url') ? (string) kop_operator_page_url($id) : '',
+            'alias_of'   => (int) ($idx['alias_of'][$id] ?? 0),
+            'paragraphs' => $h['paragraphs'],
+            'sources'    => $h['sources'],
+            'notes'      => $h['notes'],
+        );
+    }
+    usort($out, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
+    return $out;
+}
+
+/**
+ * Set a company's history to 'published' or back to 'draft' through the pencil's own save (inline edit
+ * "operator:<id>:history", kop_ie_operator_save()), so the page cache and the index are refreshed the same way.
+ */
+function kop_ar_history_set_status($oid, $status) {
+    global $wpdb;
+    $oid = (int) $oid;
+    if (!in_array($status, array('published', 'draft'), true)) throw new RuntimeException('Unknown status.');
+    if (!function_exists('kop_ie_operator_save')) throw new RuntimeException('The inline editor is not loaded.');
+    $json = json_decode((string) $wpdb->get_var($wpdb->prepare('SELECT json_data FROM `' . $wpdb->prefix . 'kop_operators` WHERE id = %d', $oid)), true);
+    $op = is_array($json) && is_array($json['operator'] ?? null) ? $json['operator'] : null;
+    if (!$op) throw new RuntimeException('That company record is gone.');
+    $h = kop_operator_history_written($op, true);
+    if (!$h) throw new RuntimeException('This company has no written history.');
+    if ($status === 'published' && $h['status'] === 'published') throw new RuntimeException('Its history is published already. Reload the page.');
+    if ($status === 'draft' && $h['status'] !== 'published') throw new RuntimeException('Its history is a draft already.');
+    kop_ie_operator_save(array((string) $oid, 'history'), array('historyStatus' => $status));
+    return $status === 'published' ? 'Published: the history is on the company page for everyone now.' : 'Taken back: the history is a draft again, seen by admins only.';
+}
+
+/* ---- Older AI drafts: the hourly AI write-ups from before 2026-11-13 (Older AI drafts tab) --------------------- */
+
+/**
+ * Write-up drafts that are not Claude's rewrites (no 'kind'; by 'ai', kop_wu_write()), newest first:
+ * [key => {key, kind, id, at, published}]. They went unseen once the inbox's Write-ups queue was switched off.
+ */
+function kop_ar_older_drafts() {
+    global $wpdb;
+    kop_wu_ensure_tables();
+    $base = (int) kop_wu_operator_key(0);
+    $out = array();
+    foreach ((array) $wpdb->get_results('SELECT facility_id, draft, published FROM ' . kop_wu_table() . ' ORDER BY id', ARRAY_A) as $r) {
+        $key = (int) $r['facility_id'];
+        unset($out[$key]);   // a merge can leave two rows: the newest counts (kop_wu_get())
+        if ($key <= 0 || $key >= $base) continue;   // kop_wu_publish() writes facilities only
+        $d = json_decode((string) $r['draft'], true) ?: array();
+        if (($d['kind'] ?? '') === 'rewrite' || !array_filter(array_map('trim', array_map('strval', (array) ($d['paragraphs'] ?? array()))), 'strlen')) continue;
+        $p = json_decode((string) $r['published'], true) ?: array();
+        $out[$key] = array('key' => $key, 'kind' => 'facility', 'id' => $key, 'at' => (string) ($d['at'] ?? ''),
+            'published' => !empty($p['rewrite']) ? 'rewrite' : (!empty($p['paragraphs']) ? 'writeup' : ''));
+    }
+    uasort($out, function ($a, $b) { return strcmp($b['at'], $a['at']); });
+    return $out;
+}
+
+/** Publish an older AI draft as written (kop_wu_publish(): held facts go on the record, the draft is the About). */
+function kop_ar_older_publish($key, $reviewer) {
+    $key = (int) $key;
+    $older = kop_ar_older_drafts();
+    if (!isset($older[$key])) throw new RuntimeException('That draft is gone or was replaced. Reload the page.');
+    $res = kop_wu_publish($key, $reviewer);
+    return str_replace(' Undo in Recently done takes it all back.', '', $res['message']);
+}
+
+/** Take back an older draft just published: the facts are held again, the About and the draft are as they were. */
+function kop_ar_older_undo($key, $reviewer) {
+    $pub = kop_wu_get((int) $key)['published'];
+    if (empty($pub['log']) || !empty($pub['rewrite'])) throw new RuntimeException('Nothing published from this draft to take back.');
+    return kop_wu_undo((int) $pub['log'], $reviewer) . ' The draft is waiting again.';
+}

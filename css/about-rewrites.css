@@ -91,3 +91,16 @@
     .kop-ar-results td.num::before { content: attr(data-label); }
     .kop-ar-results .kop-ar-stage, .kop-ar-results .kop-ar-flagcell { width: auto; text-align: left; }
 }
+
+/* Company histories and Older AI drafts tabs. */
+.kop-ar-history__text { max-width: 820px; }
+.kop-ar-history__text table { border-collapse: collapse; margin: 0 0 12px; font-size: 13px; }
+.kop-ar-history__text th, .kop-ar-history__text td { border: 1px solid #dcdcde; padding: 4px 8px; text-align: left; vertical-align: top; }
+.kop-ar-history__text caption { text-align: left; font-weight: 600; padding: 0 0 4px; }
+.kop-ar-history__text a, .kop-ar-sources a { color: var(--kop-navy, #000080); }
+.kop-ar-pq { margin: 0 0 12px; padding: 2px 0 2px 12px; border-left: 3px solid var(--kop-teal, #33A7B5); font-style: italic; }
+.kop-ar-needs > p { margin: 0; font-size: 14px; }
+.kop-ar-sources { margin: 4px 0 0 20px; }
+.kop-ar-sources li { overflow-wrap: anywhere; }
+.kop-ar-warn { margin: 0 0 10px; padding: 6px 10px; border-left: 4px solid var(--kop-orange, #EF9034); background: #fff8ef; color: #3c434a; }
+.kop-ar-history__text .kop-op-history-table-scroll { overflow-x: auto; max-width: 100%; }
