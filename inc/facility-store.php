@@ -2179,6 +2179,11 @@ if (!function_exists('kop_facility_allocate_id')) {
             $rows = kop_facility_db_rows($sql, array(), $opts);
             if ($rows && $rows[0]['m'] !== null) $max = max($max, (int)$rows[0]['m']);
         }
+        // A merge points the dropped record's identity row at the record kept, so the row's key
+        // ('save:<id>') can be above every facility_id. That id is spent too: on 2026-11-27 record
+        // 100906 was merged into 9641 and every new record failed on the key 'save:100906'.
+        $rows = kop_facility_db_rows("SELECT identity_key AS k FROM {$identity} WHERE identity_key LIKE 'save:%' ORDER BY LENGTH(identity_key) DESC, identity_key DESC LIMIT 1", array(), $opts);
+        if ($rows && preg_match('/^save:(\d+)$/', (string)$rows[0]['k'], $m)) $max = max($max, (int)$m[1]);
         $id = $max + 1;
         kop_facility_db_exec(
             "INSERT INTO {$identity} (identity_key, facility_id, unique_name) VALUES (?, ?, ?)",

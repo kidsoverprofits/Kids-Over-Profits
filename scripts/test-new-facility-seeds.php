@@ -132,6 +132,12 @@ foreach ($entries as $i => $entry) {
 }
 echo count($expect) . " entries are not on file in the mirror\n";
 
+// A record made and merged away leaves its identity row on the record kept: its id is spent, never handed out again.
+$spent = (int) $one('SELECT MAX(id) FROM facilities_v2') + 1;
+if (!$one('SELECT 1 FROM wpdl_kop_facility_identity WHERE identity_key = ?', array('save:' . $spent))) {
+    $pdo->prepare('INSERT INTO wpdl_kop_facility_identity (identity_key, facility_id, unique_name) VALUES (?, ?, ?)')
+        ->execute(array('save:' . $spent, (int) $one('SELECT MIN(id) FROM facilities_v2'), 'merged away'));
+}
 $before = (int) $one('SELECT COUNT(*) FROM facilities_v2');
 $homes_before = (int) $one('SELECT COUNT(*) FROM wpdl_kop_program_homes');
 $done = kop_apply_new_facility_seeds();
@@ -174,6 +180,8 @@ foreach ($expect as $i) {
 $check('each new record carries its name, operator, status, city, licence, links, notes, source, page and tie', !$bad, implode('; ', array_slice($bad, 0, 12)));
 $check('homes tied: one row each, nothing else moved', (int) $one('SELECT COUNT(*) FROM wpdl_kop_program_homes') === $homes_before + $ties, $ties . ' ties');
 
+$check('the id of a record merged away is not handed out again', !$one('SELECT 1 FROM facilities_v2 WHERE id = ?', array($spent))
+    && (int) $one('SELECT MAX(id) FROM facilities_v2') === $spent + count($expect), 'spent ' . $spent . ', highest now ' . $one('SELECT MAX(id) FROM facilities_v2'));
 $again = kop_apply_new_facility_seeds();
 $check('a second run adds nothing', !$again && (int) $one('SELECT COUNT(*) FROM facilities_v2') === $after
     && (int) $one('SELECT COUNT(*) FROM wpdl_kop_program_homes') === $homes_before + $ties, count($again) . ' reported');
