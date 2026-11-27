@@ -64,6 +64,27 @@ Before any general web search, every research task (and every research agent pro
    holds documents not yet synced to the media library (Drive Sync, `docs/claude/documents.md`).
 Only then the open web, for what neither holds. Reports cite KOP's own copy beside the original URL.
 
+## KOP is never the primary source: always check the actual references (standing rule, owner 2026-11-27)
+
+A KOP page, record, company history, timeline, wiki entry or write-up is never the source of a fact. It is a pointer to
+the sources it cites. Before saying that a fact "rests on KOP alone", "has no source" or "could not be confirmed", and
+before citing a KOP page for it, do all of this:
+
+1. **Open the page's reference list and read the cited source.** Every published KOP page ends with its sources (the
+   corporatization page cites Youth Today for its Brown Schools lines). Find the one that carries the fact, read it, and
+   cite that source with the sentence that says it. Check KOP's own copy first (`news_submissions`, the media library).
+2. **Read the subject's own archived website.** A link between a program and a company usually came from the company's
+   pages. List the Wayback captures of its domain (`https://web.archive.org/cdx/search/cdx?url=<domain>&matchType=domain`)
+   and read the pages that name the place, then archive them (the Wayback rule under Code Conventions).
+3. **Search the text of what KOP holds, not only the titles**: `wpdl_kop_doc_text`, news and lawsuit rows, the
+   Google Drive documents (the owner's state lists and source documents), for every name the record carries.
+
+A link, name or year on a record that carries no citation is not "unsourced": it means nobody has written the source
+down yet. Find it by the three steps above before proposing to remove, demote or question it, and say in the report
+which of them were done. Every research agent prompt carries this rule. Why: on 2026-11-26 a session called the Brown
+Schools link on Letot Center unsourced and its 2004 end date "KOP's page alone"; the company's own archived pages and
+the Youth Today article the page cites settled both, and neither had been opened.
+
 ## Sources found during research (standing rule for every agent)
 
 Any time background research turns up a relevant source that KOP does not hold yet (news article, court record, bill,
