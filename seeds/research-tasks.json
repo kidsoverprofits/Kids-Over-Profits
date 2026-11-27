@@ -37412,7 +37412,26 @@
      "kind": "website"
     }
    ]
+  },
+  {
+   "key": "teen-project-csec-home-list:is-the-children-s-home-shelter-for-family-safety",
+   "section": "Teen Project CSEC home list",
+   "title": "Is the Children's Home Shelter for Family Safety in Sioux Falls part of the same campus or licence as Sioux Falls Children's Home?",
+   "text": "The shelter was added as record 100912 (Children's Home Society of South Dakota, licensed shelter care for up to 8 children 0-17, last posted licence July 2024 to June 2025). KOP also holds Sioux Falls Children's Home (14063) and Black Hills Children's Home (14057), which look like the same operator; neither names an operator and no tie was made. Also unsettled: whether the shelter's licence was renewed after June 2025.",
+   "context": "",
+   "records": [
+    14063,
+    14057
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "South Dakota DSS 2024 licensing report",
+     "url": "https://dss.sd.gov/docs/childprotection/facilitylicensing/CHILDRENS_HOME_FOR_SHELTER_AND_FAMILY_SAFETY/CHSFS_2024.pdf",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-27 18:49"
+ "built": "2026-11-27 19:16"
 }
