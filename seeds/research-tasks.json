@@ -37073,7 +37073,143 @@
      "kind": "news"
     }
    ]
+  },
+  {
+   "key": "teen-project-csec-home-list:does-youth-crisis-center-inc-of-casper-wy-also-r",
+   "section": "Teen Project CSEC home list",
+   "title": "Does Youth Crisis Center Inc. of Casper, WY also run the Laramie Youth Crisis Center?",
+   "text": "The list tied its 'Youth crisis shelter' row (100905, assumed to be the Casper shelter) to the Laramie record (13423, 960 N. 5th St., Laramie) as the same operator. No source for that was given, so the record was added without the tie. If one operator runs both, tie 100905 to 13423 at Program Homes; if the row is really the Laramie shelter, merge them.",
+   "context": "",
+   "records": [
+    100905,
+    13423
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "Cause IQ profile",
+     "url": "https://www.causeiq.com/organizations/youth-crisis-center",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "teen-project-csec-home-list:is-family-service-of-rhode-island-s-wilson-house",
+   "section": "Teen Project CSEC home list",
+   "title": "Is Family Service of Rhode Island's Wilson House in Rumford still open, and is it connected to South County Academy in Exeter?",
+   "text": "The list tied Wilson House (100901) to South County Academy (100723) on the shared operator only. A 2018 DCYF provider guide lists FSRI 'Wilson' residential, ages 12-17; no current status, capacity or licence was found. Added without the tie.",
+   "context": "",
+   "records": [
+    100901,
+    100723
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "DCYF 2018 residential provider guide",
+     "url": "https://dcyf.ri.gov/sites/g/files/xkgbur416/files/documents/behavioral-health/ServiceProviderGuide-Update-2018_ResidentialGroupCareServices.pdf",
+     "kind": "note"
+    },
+    {
+     "label": "News: Narragansett Boys Facility Losses New Admissions Amid DCYF Safety Probe (Hoodline, 2026-10-29)",
+     "url": "https://hoodline.com/2026/10/narragansett-boys-facility-loses-new-admissions-amid-dcyf-safety-probe/",
+     "kind": "news"
+    }
+   ]
+  },
+  {
+   "key": "teen-project-csec-home-list:did-visionquest-run-a-safe-house-for-sexually-ex",
+   "section": "Teen Project CSEC home list",
+   "title": "Did VisionQuest run a 'Safe House' for sexually exploited children in Pennsylvania?",
+   "text": "The Teen Project's list names one; KOP's check found no public source that the program exists, where it is, or that it is open. Record 100900 was added as Unknown without a tie to VisionQuest (10309).",
+   "context": "",
+   "records": [
+    100900,
+    10309
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "News: Troubled youth detention firm seeks to open migrant child shelter in Los Angeles (Reveal, 2019-11-21)",
+     "url": "https://revealnews.org/article/troubled-youth-detention-firm-seeks-to-open-migrant-child-shelter-in-los-angeles/",
+     "kind": "news"
+    },
+    {
+     "label": "News: VisionQuest, For-Profit Firm Tapped to House Migrant Kids in Philadelphia, Has Sordid History (The Daily Beast, 2019-07-01)",
+     "url": "https://www.thedailybeast.com/visionquest-for-profit-firm-tapped-to-house-migrant-kids-in-philadelphia-has-sordid-history",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? New blast at camps for youths; Probe sending offenders out of state (The Sacramento Bee, 1998-07-02)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/folo_0702.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Who's Guarding the Kids? Some counties keep young offenders close to home: The catch -- all costs are borne locally (The Sacramento Bee, 1998-06-30)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part03_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "News: Oversight of youth-offender camps often falls short (The Sacramento Bee, 1998-06-29)",
+     "url": "http://classic.sacbee.com/news/projects/guarding_kids/part02_01.html",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Levy Konigsberg files suit against VisionQuest National, Ltd. for 20 survivors of childhood sexual abuse (press release, May 22, 2024)",
+     "url": "https://www.prnewswire.com/news-releases/levy-konigsberg-attorneys-anna-kull-and-rebecca-kimmel-filed-a-lawsuit-this-week-against-visionquest-national-ltd-visionquest-on-behalf-of-20-brave-survivors-of-childhood-sexual-abuse-perpetrated-by-staff-members-at-pennsylv-302153245.html",
+     "kind": "court"
+    }
+   ]
+  },
+  {
+   "key": "teen-project-csec-home-list:did-oasis-refuge-in-willard-mo-close-and-when",
+   "section": "Teen Project CSEC home list",
+   "title": "Did Oasis Refuge in Willard, MO close, and when?",
+   "text": "The list marks it Closed, but the summary it came with describes a licensed home (Missouri DSS listing: capacity 8, girls 10-20) and cites nothing about a closure. Record 100883 carries status Closed on the list's word alone.",
+   "context": "",
+   "records": [
+    100883
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "Missouri DSS licensed residential facility listing",
+     "url": "https://test.dss.mo.gov/provider-services/children/docs/licensed-residential-facility-listing.pdf",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "teen-project-csec-home-list:is-clover-house-saint-francis-ministries-saline",
+   "section": "Teen Project CSEC home list",
+   "title": "Is Clover House (Saint Francis Ministries, Saline County, KS) connected to St Francis Academy in Salina, and did it stay open after 2018?",
+   "text": "Clover House (100845) opened in 2016 for girls 12 and up; nothing after 2018 was found. KOP's St Francis Academy, Salina (12612) looks like the same operator; no link was made.",
+   "context": "",
+   "records": [
+    100845,
+    12612
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": [
+    {
+     "label": "Great Bend Tribune",
+     "url": "https://www.gbtribune.com/news/business/saint-francis-community-services-hires-director-for-clover-house/",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "teen-project-csec-home-list:which-of-the-78-homes-added-from-the-teen-projec",
+   "section": "Teen Project CSEC home list",
+   "title": "Which of the 78 homes added from The Teen Project's list hold a state licence?",
+   "text": "Most were added with 'Not confirmed' on the licence line because the state lookup could not be reached or names no such home (records 100828 to 100905). Each record's notes say which agency to check.",
+   "context": "",
+   "records": [
+    100828
+   ],
+   "found": "found 2026-11-27, Teen Project home list import",
+   "directions": []
   }
  ],
- "built": "2026-11-26 17:46"
+ "built": "2026-11-27 16:31"
 }
