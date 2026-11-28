@@ -37431,7 +37431,166 @@
      "kind": "note"
     }
    ]
+  },
+  {
+   "key": "lawsuits-and-court-records:what-did-the-august-4-2026-docket-entry-in-lipar",
+   "section": "Lawsuits and court records",
+   "title": "What did the August 4, 2026 docket entry in Liparote v. Discovery Ranch dismiss, and is the case still open?",
+   "text": "D. Utah 2:26-cv-00503-JNP-DBP (KOP lawsuit #12). KOP shows the case as dismissed, but only one party appears to have been dismissed on Aug 4, 2026, and a scheduling order followed. The free dockets (Justia) do not show the entry text; PACER does. Set status and outcome from the entry.",
+   "context": "",
+   "records": [
+    10335
+   ],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": [
+    {
+     "label": "Justia docket",
+     "url": "https://dockets.justia.com/docket/utah/utdce/2:2026cv00503/164659",
+     "kind": "note"
+    },
+    {
+     "label": "News: AP investigation: Adopted kids confined in private for-profit facilities (AP News, 2026-04-28)",
+     "url": "https://apnews.com/article/adopted-children-boarding-schools-treatment-investigation-e5d8dab2e4db1f2f4c5abbfaf0d97c52?utm_source=reddit&utm_medium=share",
+     "kind": "news"
+    },
+    {
+     "label": "News: Parents say Discovery Ranch Academy’s negligence led to their son’s death in new lawsuit (Salt Lake Tribune, 2025-05-17)",
+     "url": "https://www.sltrib.com/news/health/2025/05/17/parents-sue-utahs-discovery-ranch/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Their kids died in Utah teen treatment programs. Now, these parents are asking Utah lawmakers to beef up oversight. (The Salt Lake Tribune, 2025-02-21)",
+     "url": "https://www.sltrib.com/news/health/2025/02/21/troubled-teen-industry-utah/",
+     "kind": "news"
+    },
+    {
+     "label": "News: State agency restricts license of Utah County treatment center where teen died (The Salt Lake Tribune, 2024-11-28)",
+     "url": "https://www.sltrib.com/news/2024/11/28/limits-put-discovery-ranchs/",
+     "kind": "news"
+    },
+    {
+     "label": "News: Discovery Ranch staff failed 17-year-old boy before his death, family alleges in legal notice (The Salt Lake Tribune, 2024-11-19)",
+     "url": "https://www.sltrib.com/news/2024/11/19/discovery-ranch-academy-staff/",
+     "kind": "news"
+    },
+    {
+     "label": "Court case: Liparote v. Discovery Ranch, Inc. et al. (United States District Court for the District of Utah, Central Division, filed 2026-05-28)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Liparote-v-Discovery-Ranch-Complaint.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Frederic Yeomans IV v. Discovery Ranch, Inc. (Fourth Judicial District Court, Utah County, Spanish Fork Division, filed 2017-08-18)",
+     "url": "https://kidsoverprofits.org/wp-content/uploads/Yeomans-vs-Discovery-Connections-Complaint-1.pdf",
+     "kind": "court"
+    },
+    {
+     "label": "Court case: Silvers v. Discovery Ranch Academy, et al.",
+     "url": "https://kidsoverprofits.org/parents-sue-utahs-discovery-ranch-over-teens-death/",
+     "kind": "court"
+    },
+    {
+     "label": "Woodbury Reports, April 2010, p. 11 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-april-2010-p-11-discovery-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Woodbury Reports, October 2006, p. 26 (our copy)",
+     "url": "https://kidsoverprofits.org/woodbury-reports-october-2006-146-p-26-discovery-ranch/",
+     "kind": "woodbury"
+    },
+    {
+     "label": "Linked from its record (kidsoverprofits.org)",
+     "url": "https://kidsoverprofits.org/discovery-ranch/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (kidsoverprofits.org)",
+     "url": "https://kidsoverprofits.org/document-library-discovery-ranch/",
+     "kind": "website"
+    },
+    {
+     "label": "Linked from its record (archived reddit.com)",
+     "url": "https://web.archive.org/web/2*/https://www.reddit.com/r/troubledteens/wiki/index/discoveryranch",
+     "kind": "website"
+    }
+   ]
+  },
+  {
+   "key": "lawsuits-and-court-records:what-is-the-current-status-of-united-states-ex-r",
+   "section": "Lawsuits and court records",
+   "title": "What is the current status of United States ex rel. Brockenbrough v. TrueCore Behavioral Solutions?",
+   "text": "M.D. Fla. 8:19-cv-02557-TPB-AAS, qui tam filed under seal Oct 16, 2019 (KOP lawsuit #26). KOP has status 'filed', no outcome and no docket link. Needs the docket (PACER): unsealing, the government's intervention decision, dismissal or settlement, with dates.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
+  },
+  {
+   "key": "lawsuits-and-court-records:is-there-an-arbitration-order-and-a-september-9",
+   "section": "Lawsuits and court records",
+   "title": "Is there an arbitration order and a September 9, 2026 stay in the two Doe v. Trails Academy cases (W.D.N.C. 1:24-cv-00253 and 1:24-cv-00254)?",
+   "text": "KOP holds both as waiting rows (#314, #315). Read the dockets for a motion to compel arbitration, the order on it, and a stay entered Sept 9, 2026; set status and outcome on each.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
+  },
+  {
+   "key": "lawsuits-and-court-records:what-is-the-status-of-j-p-v-singleton-and-doe-v",
+   "section": "Lawsuits and court records",
+   "title": "What is the status of J.P. v. Singleton and Doe v. Devereux (2:26-cv-03710)?",
+   "text": "Both came up in the GAO data check with no current status. Read each docket and give status, the last ruling and its date.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
+  },
+  {
+   "key": "trade-organizations-and-marketer:is-there-a-primary-source-for-natsap-s-plans-200",
+   "section": "Trade organizations and marketers",
+   "title": "Is there a primary source for NATSAP's 'plans 2006-2020' and the 2006 Bulldog PR workshop?",
+   "text": "Both are said of NATSAP in KOP's material without a primary source. Look for archived natsap.org conference and annual meeting pages (Wayback: https://web.archive.org/cdx/search/cdx?url=natsap.org&matchType=domain) and Bulldog PR's own pages; archive what is used.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": [
+    {
+     "label": "From the notes: web.archive.org/cdx/search/cdx?url=natsap.org&matchType=domain",
+     "url": "https://web.archive.org/cdx/search/cdx?url=natsap.org&matchType=domain",
+     "kind": "note"
+    }
+   ]
+  },
+  {
+   "key": "who-ran-these-programs-last:who-runs-2-boot-camp-and-teens-with-problems",
+   "section": "Who ran these programs last",
+   "title": "Who runs 2 Boot Camp and Teens with Problems?",
+   "text": "Both came up in the GAO data check with no operator on record. Settle it from their own archived websites (Wayback captures of their domains: about, contact and terms pages) and business filings.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
+  },
+  {
+   "key": "trade-organizations-and-marketer:what-does-florida-sunbiz-show-for-exceed-marketi",
+   "section": "Trade organizations and marketers",
+   "title": "What does Florida Sunbiz show for Exceed Marketing Solutions: filing number, dates and officers?",
+   "text": "Exceed Marketing Solutions came up in the GAO data check as a marketer with no business record. Search Florida's Division of Corporations (search.sunbiz.org) for the entity, its filing history and its officers, and save the filing.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
+  },
+  {
+   "key": "woodbury-facts-and-inspection-li:which-woodbury-reports-issues-do-the-referrer-li",
+   "section": "Woodbury Facts and Inspection Links",
+   "title": "Which Woodbury Reports issues do the referrer-list citations for the consultants Bruno, Gordon, Posner, Zimmerman, Rudy and Woodbury/Parlett actually come from?",
+   "text": "In KOP's list of referrers (educational consultants), these six citations do not match the Woodbury Reports issue they name. The Woodbury/Parlett entry cites issue No. 147 (November 2006), but the fact is not in the January 2007 file it points to. Find the right issue and page for each in KOP's Woodbury copies (kidsoverprofits.org/wp-content/uploads/2024/12/woodbury-MMYY.pdf) and correct the citations.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, GAO-data-check-2026-11-28",
+   "directions": []
   }
  ],
- "built": "2026-11-27 19:16"
+ "built": "2026-11-28 15:12"
 }
