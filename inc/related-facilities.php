@@ -78,6 +78,16 @@ function kop_related_categories() {
             'one'   => 'foster care agency or home',
             'intro' => 'Foster homes and the agencies that place children in them. Foster care is not the troubled teen industry, but the same agencies often run both, and children in foster care are sent to its programs.',
         ),
+        // Owner decision 2026-11-28. The line with the TTI is how a child arrives: a student who applies
+        // to an academic school is here; a school that takes children for their behavior or for therapy,
+        // or on a parent's placement (therapeutic, emotional growth, licensed as treatment), is a TTI
+        // facility whatever it calls itself. Day schools are not listed.
+        'elite-boarding-schools' => array(
+            'kind'  => 'elite',
+            'label' => 'Elite Boarding Schools',
+            'one'   => 'elite boarding school',
+            'intro' => 'Private academic boarding schools that students apply to, such as New England prep schools and British public schools. They are not troubled teen programs. They are listed because they also send children far from home to live under the control of adults, and the same abuse, and the same cover-ups, are reported there.',
+        ),
     );
 }
 
@@ -624,7 +634,12 @@ function kop_related_news($category, PDO $pdo = null) {
     return $out;
 }
 
-/** Ids of every article filed under a category in general (read once per request; empty before the table exists). */
+/**
+ * Ids of the articles that are not troubled teen industry news, read once per request: every article
+ * filed under a category in general, and every article whose records are all related records (ids
+ * above KOP_RELATED_FIRST_ID, no TTI facility among them), such as a story about one elite boarding
+ * school. The TTI news lists leave them out (kop_ischools_news_exclude_sql()); the record's page lists them.
+ */
 function kop_related_news_ids() {
     static $ids = null;
     if ($ids !== null) return $ids;
@@ -635,6 +650,14 @@ function kop_related_news_ids() {
         $ids = array_map('intval', $pdo->query('SELECT DISTINCT news_id FROM related_category_news')->fetchAll(PDO::FETCH_COLUMN));
     } catch (PDOException $e) {
         $ids = array();
+    }
+    $first = defined('KOP_RELATED_FIRST_ID') ? (int) KOP_RELATED_FIRST_ID : 900000;
+    try {
+        $only = $pdo->query("SELECT news_id FROM news_facility_links GROUP BY news_id
+                              HAVING MIN(facility_id) > $first")->fetchAll(PDO::FETCH_COLUMN);
+        $ids = array_values(array_unique(array_merge($ids, array_map('intval', $only))));
+    } catch (PDOException $e) {
+        // no link table (a test copy): nothing more to leave out
     }
     return $ids;
 }

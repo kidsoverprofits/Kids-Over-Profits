@@ -94,5 +94,17 @@
     "unique_name": "Teen Challenge of South Carolina",
     "category": "christian-adult-rehabs",
     "note": "Men 18+ (Adult & Teen Challenge finder tcsc101; Teen Challenge Research Map SL-782). Owner decision 2026-11-04 (item 29: adult Teen Challenge programs go to Christian Rehabs for Adults, as Cape Fear and Grace House did)."
+  },
+  {
+    "id": 100819,
+    "unique_name": "Gordonstoun",
+    "category": "elite-boarding-schools",
+    "note": "Private academic boarding school in Moray, Scotland, made a facility record by the news scan on 2026-11-26 from STV News 2024-06-19 (Scottish Child Abuse Inquiry findings). Not a troubled teen program: students apply to it. Owner decision 2026-11-28 (elite boarding schools are a related industry)."
+  },
+  {
+    "id": 100820,
+    "unique_name": "Aberlour",
+    "category": "elite-boarding-schools",
+    "note": "Aberlour House, Gordonstoun's junior boarding school, made a facility record by the news scan on 2026-11-26 from the same STV News article. Owner decision 2026-11-28 (elite boarding schools are a related industry)."
   }
 ]

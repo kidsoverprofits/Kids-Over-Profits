@@ -1,0 +1,225 @@
+[
+  {
+    "category": "elite-boarding-schools",
+    "name": "Choate Rosemary Hall",
+    "city": "Wallingford",
+    "state": "CT",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8314,
+      8809,
+      4239
+    ],
+    "drop_links": {
+      "4239": [
+        12672
+      ]
+    },
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Loomis Chaffee School",
+    "city": "Windsor",
+    "state": "CT",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8574,
+      8628
+    ],
+    "other_names": [
+      "Loomis Chaffee"
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Milton Academy",
+    "city": "Milton",
+    "state": "MA",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8518,
+      8618
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Groton School",
+    "city": "Groton",
+    "state": "MA",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8746
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Hotchkiss School",
+    "city": "Lakeville",
+    "state": "CT",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      4244
+    ],
+    "other_names": [
+      "The Hotchkiss School"
+    ],
+    "drop_links": {
+      "4244": [
+        12672
+      ]
+    },
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "St. George's School",
+    "city": "Middletown",
+    "state": "RI",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8564,
+      8436
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Emma Willard School",
+    "city": "Troy",
+    "state": "NY",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8394
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Kent School",
+    "city": "Kent",
+    "state": "CT",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      4241
+    ],
+    "drop_links": {
+      "4241": [
+        12672
+      ]
+    },
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Lawrenceville School",
+    "city": "Lawrenceville",
+    "state": "NJ",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      8682,
+      7829
+    ],
+    "other_names": [
+      "The Lawrenceville School"
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Thacher School",
+    "city": "Ojai",
+    "state": "CA",
+    "country": "United States",
+    "status": "Open",
+    "news": [
+      10012,
+      9297
+    ],
+    "other_names": [
+      "The Thacher School"
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Gordonstoun",
+    "city": "Moray",
+    "country": "United Kingdom",
+    "status": "Open",
+    "news": [
+      8325,
+      11597
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Aberlour House",
+    "city": "Aberlour",
+    "country": "United Kingdom",
+    "status": "Open",
+    "news": [
+      11597
+    ],
+    "find": [
+      "Aberlour"
+    ],
+    "note": "Gordonstoun's junior boarding school (STV News 2024-06-19, Scottish Child Abuse Inquiry findings). Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Christ's Hospital",
+    "city": "Horsham",
+    "country": "United Kingdom",
+    "status": "Open",
+    "news": [
+      8750
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Sigtunaskolan Humanistiska Läroverket",
+    "city": "Sigtuna",
+    "country": "Sweden",
+    "status": "Open",
+    "news": [
+      11621
+    ],
+    "other_names": [
+      "SSHL"
+    ],
+    "note": "Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "Maidwell Hall",
+    "country": "United Kingdom",
+    "status": "Open",
+    "news": [
+      368
+    ],
+    "note": "Prep boarding school in Northamptonshire, England (Thought Catalog 2026-09-22, on Charles Spencer's account of his years there). Added 2026-11-28 with the news articles about it that had been deleted from the news queue (owner decision: elite boarding schools are a related industry)."
+  },
+  {
+    "category": "elite-boarding-schools",
+    "name": "",
+    "news": [
+      1714
+    ],
+    "note": "The Guardian 2026-10-12 on child-on-child sexual abuse at UK boarding schools: about the schools in general."
+  }
+]

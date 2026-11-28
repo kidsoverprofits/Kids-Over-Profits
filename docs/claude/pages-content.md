@@ -34,9 +34,15 @@ php scripts/test-page-text.php
 # Fixes to a published page's words ship as 'post' entries in seeds/text-fixes.json (exact swaps, all or none, once per 'fix'
 # id, revision kept; kop_apply_text_fixes()); also fix the seeds/history/ copy. Never reseed an edited page
 php -d extension=pdo_sqlite -d extension=mbstring scripts/test-post-text-fixes.php   # every page entry applies once to the mirror's text
-# Related industries OUTSIDE the TTI (foster care, adult disability group homes, nursing homes, psychiatric hospitals) and their
+# Related industries OUTSIDE the TTI (foster care, adult disability group homes, nursing homes, psychiatric hospitals, elite boarding schools) and their
 # /related-industries/ index: one shared template (templates/page-related-industry.php), text in js/data/pages/<slug>.json, Page Text.
 # No facility records; linked from the History hub's 'outside' block. Migrant shelters, juvenile detention, PRTFs/RTCs are TTI, never here
+# Elite boarding schools (owner 2026-11-28): records in related_facilities, category elite-boarding-schools (/related/elite-boarding-schools/).
+# The line is how a child arrives: an academic school students apply to is here; one that takes children for behavior or therapy,
+# or on a parent's placement, is a TTI facility whatever it calls itself; day schools are not listed. The news scan files a name it
+# reads as one (kind elite_school, kop_facdisc_elite_school(): the school's record, new ones waiting for review) instead of making a
+# facility. An article linked only to related records is left out of the TTI news lists (kop_related_news_ids())
+php -d extension=pdo_sqlite -d extension=mbstring scripts/test-related-record-seeds.php   # seeds/related-records.json on a copy of the mirror: records, articles, second run, exact Undo
 # Utility and legal page templates: shortcode/share behavior, case metadata and image alt text
 php scripts/test-utility-pages.php
 # Live content with local utility/legal template CSS, screenshots at 390/768/1440

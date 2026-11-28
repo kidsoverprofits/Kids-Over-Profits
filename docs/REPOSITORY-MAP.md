@@ -112,7 +112,7 @@ and those two functions.
 | `page-tradeorg-index.php` | `trade-organizations` (`inc/tradeorgs.php`) |
 | `page-young-adult-programs.php` | `young-adult-programs` (`inc/young-adult-programs.php`) |
 | `page-indian-boarding-schools.php` | `indian-boarding-schools` (`inc/indigenous-schools.php`; text in `js/data/pages/indian-boarding-schools.json`) |
-| `page-related-industry.php` | `related-industries`, `foster-care`, `disability-group-homes`, `nursing-homes`, `psychiatric-hospitals`; drafts until the owner publishes them, text in `js/data/pages/<slug>.json` |
+| `page-related-industry.php` | `related-industries`, `foster-care`, `disability-group-homes`, `nursing-homes`, `psychiatric-hospitals`, `elite-boarding-schools`; drafts until the owner publishes them, text in `js/data/pages/<slug>.json` |
 | `page-faq.php` | `faq` (text in `js/data/pages/faq.json`) |
 | `page-glossary.php` | `glossary` |
 | `page-report-abuse.php` | `report-abuse` |

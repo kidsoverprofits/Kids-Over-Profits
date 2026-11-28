@@ -190,7 +190,7 @@ check(!$errs, 'the FAQ page parses as HTML without errors');
 echo "Related industries
 ";
 // One template for the index and every industry page; it reads the page's own slug.
-$topics = array('foster-care', 'disability-group-homes', 'nursing-homes', 'psychiatric-hospitals');
+$topics = array('foster-care', 'disability-group-homes', 'nursing-homes', 'psychiatric-hospitals', 'elite-boarding-schools');
 $topic_tail = array('report', 'learn', 'wrong', 'updated', 'sources');
 foreach (array_merge(array('related-industries'), $topics) as $slug) {
     $page = kop_page_text_page($slug);

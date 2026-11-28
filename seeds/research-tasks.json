@@ -37590,7 +37590,33 @@
    "records": [],
    "found": "found 2026-11-28, GAO-data-check-2026-11-28",
    "directions": []
+  },
+  {
+   "key": "news:which-boarding-school-are-three-deleted-news-art",
+   "section": "news",
+   "title": "Which boarding school are three deleted news articles about?",
+   "text": "Filing elite boarding schools as a related industry (2026-11-28), three deleted articles could not be placed because the school is not named in KOP's copy and the original pages would not open: news #8741 BBC 2016-04-26 'Arrests over Essex boarding school abuse claims'; news #7146 nospank.net 2005-04-22 'Mother Files Lawsuit, Claims Boarding School Abused Son'; news #1459 New York Times 2002-06-02 'Skeletons in the Classroom' (approved, still in the TTI news). For each, find the school; if it is an academic boarding school students apply to, file the article under it at Elite Boarding Schools (Review inbox, Move to Elite Boarding Schools); if it is a TTI program, link it to the facility.",
+   "context": "",
+   "records": [],
+   "found": "found 2026-11-28, Claude session, elite boarding schools",
+   "directions": [
+    {
+     "label": "NYT",
+     "url": "https://www.nytimes.com/2002/06/02/style/skeletons-in-the-classroom.html",
+     "kind": "note"
+    },
+    {
+     "label": "nospank.net",
+     "url": "http://www.nospank.net/n-o48r.htm",
+     "kind": "note"
+    },
+    {
+     "label": "BBC",
+     "url": "https://www.bbc.com/news/uk-england-essex-36138223",
+     "kind": "note"
+    }
+   ]
   }
  ],
- "built": "2026-11-28 15:12"
+ "built": "2026-11-28 15:20"
 }

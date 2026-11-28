@@ -72,7 +72,7 @@ function kop_rinbox_facdisc_view_decisions() {
         'held'    => array('possible_duplicate', 'other_era', 'needs_place', 'unquoted'),
         'matched' => array('matched'),
         'created' => array('created'),
-        'aside'   => array('provider', 'not_facility', 'indigenous_school', 'young_adult'),
+        'aside'   => array('provider', 'not_facility', 'indigenous_school', 'elite_school', 'young_adult'),
         'removed' => array('removed'),
     );
 }
@@ -306,6 +306,11 @@ function kop_rinbox_facdisc_item(array $r) {
         $links[] = array('label' => 'Filed at Young Adult Programs', 'url' => admin_url('admin.php?page=kop-young-adult-programs'));
     } elseif ($r['decision'] === 'indigenous_school') {
         $links[] = array('label' => 'Filed at Indigenous Schools', 'url' => admin_url('admin.php?page=kop-indigenous-schools'));
+    } elseif ($r['decision'] === 'elite_school') {
+        // A related industry's record (kop_facdisc_elite_school()); a new one waits for review.
+        $rid = (int) ($detail['related_id'] ?? 0);
+        $rurl = $rid && function_exists('kop_related_url') ? (string) kop_related_url($rid) : '';
+        $links[] = array('label' => 'Filed at Elite Boarding Schools', 'url' => $rurl !== '' ? $rurl : home_url('/related/elite-boarding-schools/'));
     }
 
     $details = array();

@@ -52,6 +52,7 @@ function kop_facdisc_decisions() {
         'provider'     => 'Provider, not a facility',
         'not_facility' => 'Skipped (not a facility)',
         'indigenous_school' => 'Indigenous residential school',
+        'elite_school' => 'Elite boarding school (related industry)',
         'young_adult'  => 'Young adult program (18+)',
         'removed'      => 'Removed',
     );
@@ -491,10 +492,12 @@ function kop_facdisc_build_prompt(array $news, array $names, array $lookalikes, 
         }
     }
     $p .= "\nReturn ONLY a JSON object with one entry per name, in the same order:\n";
-    $p .= '{"names":[{"name":"the name exactly as listed","kind":"facility|indigenous_school|provider|organization|vague","sameAs":null,"renameOf":null,"officialName":"","otherNames":[],"city":"","state":"two-letter US state code, or empty","country":"","type":"","status":"Open|Closed|Suspended|Unknown","startYear":null,"endYear":null,"operator":"","gender":"Male|Female|Co-ed or empty","evidence":"one sentence copied from the article that places or describes it"}]}' . "\n\n";
+    $p .= '{"names":[{"name":"the name exactly as listed","kind":"facility|indigenous_school|elite_school|provider|organization|vague","sameAs":null,"renameOf":null,"officialName":"","otherNames":[],"city":"","state":"two-letter US state code, or empty","country":"","type":"","status":"Open|Closed|Suspended|Unknown","startYear":null,"endYear":null,"operator":"","gender":"Male|Female|Co-ed or empty","evidence":"one sentence copied from the article that places or describes it"}]}' . "\n\n";
     $p .= "kind:\n";
     $p .= "- facility: one specific youth residential program or site, named well enough to identify (a detention center, an academy, a ranch, a group home).\n";
     $p .= "- indigenous_school: a school, past or present, that Indigenous children (American Indian, Alaska Native, Native Hawaiian, First Nations, Inuit, Metis) were sent to under a government or church policy of removal or assimilation: an Indian boarding school, Indian residential school, Indian industrial or manual labor school, or Indian mission school. Never a troubled teen program, even one with Native students. For one, fill officialName, otherNames, city, state or country, status, startYear and endYear (any year the article gives, even before 1900) and operator (the government, church or order that ran it).\n";
+    $p .= "- elite_school: a private academic boarding school that students apply to and that does not take children for their behavior or for therapy: a New England prep school (Choate Rosemary Hall, Phillips Exeter, St. George's), a British public or preparatory boarding school (Gordonstoun, Christ's Hospital), or the like. Never a therapeutic, emotional growth, military, religious or behavior-modification boarding school, or any school that takes children a parent or agency placed there because of their behavior: those are facility. For one, fill officialName, otherNames, city, state or country, and status.
+";
     $p .= "- provider: a psychiatric hospital or ward, outpatient clinic, day school, day treatment or partial hospitalization program.\n";
     $p .= "- organization: an agency, department, court, police force, law firm, company, charity, church, school district, or anything that is not one residential site. A company that runs programs is an organization; its programs are facilities.\n";
     $p .= "- vague: a description rather than a name (\"the facility\", \"an unnamed children's home\", \"Hope unit\", \"Safe\"), or a name too generic to identify one place.\n";
@@ -544,7 +547,7 @@ function kop_facdisc_parse_reply($reply, array $names, array $lookalikes) {
         }
         $name = $by_key[$key];
         $kind = strtolower($str($e['kind'] ?? ''));
-        if (!in_array($kind, array('facility', 'indigenous_school', 'provider', 'organization', 'vague'), true)) {
+        if (!in_array($kind, array('facility', 'indigenous_school', 'elite_school', 'provider', 'organization', 'vague'), true)) {
             $kind = 'vague';
         }
         $allowed = array();
@@ -652,6 +655,34 @@ function kop_facdisc_build_doc(array $entry, array $news) {
     return $doc;
 }
 
+/** The related category an elite boarding school is filed in (inc/related-facilities.php). */
+if (!defined('KOP_FACDISC_ELITE')) {
+    define('KOP_FACDISC_ELITE', 'elite-boarding-schools');
+}
+
+/**
+ * The elite boarding school's related record, found by its name (official, as written, or another
+ * name the article gives) or made, waiting for review; the article is linked to it. Returns the id.
+ */
+function kop_facdisc_elite_school(PDO $pdo, array $entry, array $news) {
+    global $wpdb;
+    $opts = array('pdo' => $pdo, 'prefix' => isset($wpdb) ? $wpdb->prefix : 'wp_', 'skip_memberships' => true);
+    $state = ($entry['state'] ?? '') !== '' ? $entry['state'] : null;
+    $id = 0;
+    foreach (array_merge(array($entry['officialName'] ?? '', $entry['name']), (array) ($entry['otherNames'] ?? array())) as $n) {
+        if (trim((string) $n) !== '' && ($id = kop_related_find(KOP_FACDISC_ELITE, $n, $state, $opts))) break;
+    }
+    if (!$id) {
+        $entry += array('officialName' => $entry['name'], 'otherNames' => array(), 'city' => '', 'state' => '', 'country' => '',
+            'startYear' => null, 'endYear' => null, 'status' => 'Unknown', 'operator' => '', 'type' => '', 'gender' => '');
+        $doc = kop_facdisc_build_doc($entry, $news);
+        $doc['facilityDetails']['type'] = '';   // the TTI facility types do not fit a school
+        $id = kop_related_save(KOP_FACDISC_ELITE, $doc, 0, $opts + array('review' => 'pending'));
+    }
+    kop_facdisc_link($pdo, $news['id'], $id);
+    return (int) $id;
+}
+
 /** Link the article to the record; 'related' so a later edit's mention sync keeps it. */
 function kop_facdisc_link(PDO $pdo, $news_id, $facility_id) {
     $pdo->prepare("INSERT IGNORE INTO news_facility_links (news_id, facility_id, link_type, created_by) VALUES (?, ?, 'related', 'news-discovery')")
@@ -710,6 +741,19 @@ function kop_facdisc_apply_entry(PDO $pdo, array $entry, array $news, $write) {
         $detail['school_id'] = kop_ischools_from_news($pdo, $entry, $news);
         kop_facdisc_record($pdo, $entry['name'], $news, 'indigenous_school', null, $detail);
         return array('indigenous_school', null);
+    }
+    if ($entry['kind'] === 'elite_school' && !function_exists('kop_related_find')) {
+        $entry['kind'] = 'organization';   // the related records are not loaded: never a facility
+    }
+    if ($entry['kind'] === 'elite_school') {
+        // A related industry, not a TTI facility: the article goes on the school's record at
+        // Elite Boarding Schools (a new record waits for review), never on a facility record.
+        if (!$write) {
+            return array('elite_school', null);
+        }
+        $detail['related_id'] = kop_facdisc_elite_school($pdo, $entry, $news);
+        kop_facdisc_record($pdo, $entry['name'], $news, 'elite_school', null, $detail);
+        return array('elite_school', null);
     }
     if ($entry['kind'] === 'facility' && kop_facdisc_is_place_name($pdo, $entry['name'], $entry['state'] ?? '', $entry['city'] ?? '')) {
         // A town in a list of a company's sites, not a program's name.
@@ -787,6 +831,9 @@ function kop_facdisc_scan_article(PDO $pdo, array $news, $write) {
             } elseif ($known['decision'] === 'indigenous_school' && function_exists('kop_ischools_find_by_name')
                 && ($school = kop_ischools_find_by_name($pdo, $known['mention'] ?? ''))) {
                 kop_ischools_link_news($pdo, (int) $school['id'], (int) $news['id'], 'news-discovery');
+            } elseif ($known['decision'] === 'elite_school' && function_exists('kop_related_find')
+                && ($rid = kop_related_find(KOP_FACDISC_ELITE, (string) ($known['mention'] ?? ''), null, array('pdo' => $pdo)))) {
+                kop_facdisc_link($pdo, $news['id'], $rid);
             }
         }
     }
@@ -1522,6 +1569,8 @@ function kop_render_facilities_from_news_page() {
                 . '<button type="submit" class="button button-small" onclick="return confirm(\'Remove the record the scan created for this?\')">Remove the record it created</button></form>';
         } elseif ($r['decision'] === 'indigenous_school') {
             echo 'Filed at <a href="' . esc_url(admin_url('admin.php?page=kop-indigenous-schools')) . '">Indigenous Schools</a>, not as a facility.';
+        } elseif ($r['decision'] === 'elite_school') {
+            echo 'Filed at <a href="' . esc_url(home_url('/related/elite-boarding-schools/')) . '">Elite Boarding Schools</a>, not as a facility.';
         } elseif (in_array($r['decision'], array('possible_duplicate', 'other_era', 'needs_place', 'unquoted', 'provider', 'not_facility', 'removed'), true)) {
             echo '<form method="post" class="kop-fd-box">';
             wp_nonce_field('kop_facilities_from_news');

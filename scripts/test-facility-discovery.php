@@ -205,7 +205,7 @@ $check('names the type vocabulary and the kinds', strpos($prompt, 'Juvenile Just
 
 // ---------------------------------------------------------------------------
 echo "-- Indigenous residential schools (filed at Indigenous Schools, never as facilities) --\n";
-$check('the prompt names the kind', strpos($prompt, '- indigenous_school:') !== false && strpos($prompt, 'facility|indigenous_school|provider') !== false);
+$check('the prompt names the kind', strpos($prompt, '- indigenous_school:') !== false && strpos($prompt, 'facility|indigenous_school|elite_school|provider') !== false);
 $check('a school name is never pre-sorted as an organization', kop_facdisc_obvious_kind('Chilocco Indian Agricultural School') === null
     && kop_facdisc_obvious_kind('Indian Agency Boarding School') === null && kop_facdisc_obvious_kind('Bureau of Indian Affairs') === 'organization');
 $check('the name test reads Indian boarding and mission schools, not TTI programs or Indiana',
@@ -219,6 +219,17 @@ $ef = kop_facdisc_parse_reply(json_encode(array('names' => array(array('name' =>
 $check('a facility still gets no year before 1900', $ef['Old Ranch']['startYear'] === null);
 $check('the dry run files it as a school, not a new facility',
     kop_facdisc_apply_entry($pdo, $es['Shawnee Indian Mission'], array('id' => 519), false) === array('indigenous_school', null));
+
+// ---------------------------------------------------------------------------
+echo "-- Elite boarding schools (a related industry, never facilities) --\n";
+$check('the prompt names the kind and keeps therapeutic schools facilities', strpos($prompt, '- elite_school:') !== false
+    && strpos($prompt, 'Never a therapeutic, emotional growth') !== false);
+$ee = kop_facdisc_parse_reply(json_encode(array('names' => array(array('name' => 'Choate', 'kind' => 'elite_school',
+    'officialName' => 'Choate Rosemary Hall', 'state' => 'CT', 'city' => 'Wallingford')))), array('Choate'), array());
+$check('the reply keeps the kind', ($ee['Choate']['kind'] ?? '') === 'elite_school' && $ee['Choate']['officialName'] === 'Choate Rosemary Hall');
+$check('the dry run files it at Elite Boarding Schools, not as a new facility',
+    kop_facdisc_apply_entry($pdo, $ee['Choate'], array('id' => 519), false) === array('elite_school', null));
+$check('the review screen names the decision', isset(kop_facdisc_decisions()['elite_school']));
 
 echo $failures ? "\n$failures FAILED\n" : "\nAll passed\n";
 exit($failures ? 1 : 0);

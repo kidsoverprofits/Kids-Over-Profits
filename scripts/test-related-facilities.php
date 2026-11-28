@@ -65,9 +65,9 @@ $pdo->exec('CREATE TEMP TABLE wpdl_kop_nonprofit_links (id INTEGER PRIMARY KEY A
     operator_id INTEGER NOT NULL DEFAULT 0, created_by TEXT NOT NULL DEFAULT \'\', created_at TEXT NOT NULL)');
 
 echo "-- Records --\n";
-$check('seven categories; each but Indian boarding schools (still on their page) has its finder kind', count(kop_related_categories()) === 7
+$check('eight categories; each but Indian boarding schools (still on their page) has its finder kind', count(kop_related_categories()) === 8
     && kop_related_kinds() === array('cra' => 'christian-adult-rehabs', 'ya' => 'young-adult-programs', 'psych' => 'psychiatric-hospitals',
-        'nursing' => 'nursing-homes', 'idd' => 'disability-group-homes', 'foster' => 'foster-care'), wp_json_encode(kop_related_kinds()));
+        'nursing' => 'nursing-homes', 'idd' => 'disability-group-homes', 'foster' => 'foster-care', 'elite' => 'elite-boarding-schools'), wp_json_encode(kop_related_kinds()));
 $check('the record finder and filing name each kind', kop_record_field_kind_words()['cra'] === 'Christian rehab for adults'
     && kop_record_field_kind_words()['nursing'] === 'nursing home');
 $id = kop_related_save('christian-adult-rehabs', array(

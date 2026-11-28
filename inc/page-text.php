@@ -62,6 +62,7 @@ function kop_page_text_pages() {
         'disability-group-homes' => 'Group Homes for Adults with Developmental Disabilities',
         'nursing-homes'          => 'Nursing Homes',
         'psychiatric-hospitals'  => 'Psychiatric Hospitals and Psych Wards',
+        'elite-boarding-schools' => 'Elite Boarding Schools',
     );
     foreach ($related as $slug => $title) {
         $pages[$slug] = array(
