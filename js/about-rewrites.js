@@ -1,7 +1,8 @@
 /**
  * KOP Tools > About rewrites (inc/about-rewrites-screen.php): the card buttons. Answer a "Needs you" question (a
- * choice, or your own words), Publish, Send back to Claude, Undo; each posts to wp_ajax_kop_about_rewrites through
- * KOPAdminKit.post (js/admin-kit.js) and says what happened on the card's result line.
+ * choice, or your own words), Publish, Send back to Claude, Undo; on the Company histories and Older AI drafts tabs
+ * Publish (history-publish, older-publish, each with its Undo) and Send to Claude (older-flag). Each posts to
+ * wp_ajax_kop_about_rewrites through KOPAdminKit.post (js/admin-kit.js) and says what happened on the card's result line.
  */
 (function () {
     var cfg = window.KOP_ABOUT_REWRITES || {};
@@ -58,21 +59,27 @@
             return;
         }
         var data = { act: act };
-        if (act === 'send-back') {
+        if (act === 'send-back' || act === 'older-flag') {
             var box = card.querySelector('.kop-ar-folds textarea');
             data.note = box ? box.value : '';
         }
         btn.disabled = true;
-        say(card, act === 'publish' ? 'Publishing...' : act === 'undo' ? 'Taking it back...' : 'Sending...');
+        say(card, /publish$/.test(act) ? 'Publishing...' : /undo$/.test(act) ? 'Taking it back...' : 'Sending...');
         post(card, data).then(function (d) {
+            if (act === 'older-flag') {   // the draft can still be published as written
+                btn.disabled = false;
+                btn.textContent = 'Save the note';
+                say(card, d.message);
+                return;
+            }
             card.classList.add('is-done');
             card.querySelectorAll('.kop-ak-card__buttons button, .kop-ar-folds button').forEach(function (b) { b.disabled = true; });
             say(card, d.message);
-            if (act === 'publish') {
+            if (d.undo) {
                 var undo = document.createElement('button');
                 undo.type = 'button';
                 undo.className = 'button kop-ak-btn kop-ak-btn--quiet';
-                undo.setAttribute('data-act', 'undo');
+                undo.setAttribute('data-act', d.undo);
                 undo.textContent = 'Undo';
                 card.querySelector('.kop-ak-result').appendChild(document.createTextNode(' '));
                 card.querySelector('.kop-ak-result').appendChild(undo);

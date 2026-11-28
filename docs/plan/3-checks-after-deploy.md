@@ -276,3 +276,13 @@ Shipped and never looked at on the live site. Signed in unless noted; take each 
     Step: Open a row, write "Where you left off", click away, reload: the note is kept
     Step: Tick the last open step of a small item: it moves to Finished and a line at the top says so
     Step: Open the Plan Board from the app's Admin tab: nothing runs off the side of the phone
+50. **About rewrites: Company histories and Older AI drafts tabs, first use on the live site** (2026-11-27). Built and
+    tested on a scratch database (scripts/test-about-rewrites-tabs.php); not yet opened on the live screen. Publish
+    there changes the public page, so try Undo right after.
+    Ask: Open the two new tabs once and say if anything is off
+    Why: They were tested on a copy, not on the live screen with the 38 histories and 455 older drafts.
+    Time: 10 min
+    Touched: 2026-11-27
+    Step: [Open About rewrites](https://kidsoverprofits.org/wp-admin/admin.php?page=kop-about-rewrites&tab=histories): Company histories lists about 38 companies with their text and sources
+    Step: Open Older AI drafts: about 455 records, newest first, each beside its About now
+    Step: Open both tabs from the app's Admin tab: nothing runs off the side of the phone

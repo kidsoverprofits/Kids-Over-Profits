@@ -90,6 +90,9 @@ request.
   - About rewrites published at KOP Tools > About rewrites (`kop_ar_publish()` / `kop_ar_undo()`,
     inc/about-rewrites.php): through `kop_wu_publish()` (held facts), survivorTestimony entries with ids
     `about:<page>:<n>` through `kop_wbf_save()`, and the published write-up with `sentences`; fires `kop_record_changed()`
+    The same screen's Older AI drafts tab publishes the old hourly drafts as written with `kop_wu_publish()` / `kop_wu_undo()`
+    (`kop_ar_older_publish()`), and its Company histories tab only flips an operator's historyStatus through
+    `kop_ie_operator_save()` (`kop_ar_history_set_status()`), the inline edit pencil's own save path
   - closure reports, Drive Docs, State Lists, Facilities from News,
     program homes, seeds, and the Data Manager
 

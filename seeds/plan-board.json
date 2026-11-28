@@ -1,6 +1,6 @@
 {
- "built": "2026-11-27 19:42 UTC",
- "source": "9a79c74818ff483ec1374bc508f6aa1d80fbd13d",
+ "built": "2026-11-27 22:56 UTC",
+ "source": "16d36bb13bc027d7fb518893f5db81b3e037e618",
  "sections": [
   {
    "key": "2",
@@ -3442,6 +3442,46 @@
        "status": "",
        "touched": "2026-11-27",
        "hash": "d610ca0cf029"
+      },
+      {
+       "id": "3:about-rewrites-company-histories-and-older-ai-drafts-tabs-fi",
+       "lead": "About rewrites: Company histories and Older AI drafts tabs, first use on the live site",
+       "text": "**About rewrites: Company histories and Older AI drafts tabs, first use on the live site** (2026-11-27). Built and tested on a scratch database (scripts/test-about-rewrites-tabs.php); not yet opened on the live screen. Publish there changes the public page, so try Undo right after.",
+       "ask": "Open the two new tabs once and say if anything is off",
+       "date": "2026-11-27",
+       "why": "They were tested on a copy, not on the live screen with the 38 histories and 455 older drafts.",
+       "go": [],
+       "choices": [],
+       "time": "10 min",
+       "kind": "check",
+       "focus": false,
+       "steps": [
+        {
+         "id": "open-about-rewrites",
+         "label": "Open About rewrites",
+         "url": "https://kidsoverprofits.org/wp-admin/admin.php?page=kop-about-rewrites&tab=histories",
+         "note": "Company histories lists about 38 companies with their text and sources",
+         "answer": ""
+        },
+        {
+         "id": "open-older-ai-drafts-about-455-records-newest-firs",
+         "label": "Open Older AI drafts: about 455 records, newest first, each beside its About now",
+         "url": "",
+         "note": "",
+         "answer": ""
+        },
+        {
+         "id": "open-both-tabs-from-the-app-s-admin-tab-nothing-ru",
+         "label": "Open both tabs from the app's Admin tab: nothing runs off the side of the phone",
+         "url": "",
+         "note": "",
+         "answer": ""
+        }
+       ],
+       "left": "",
+       "status": "",
+       "touched": "2026-11-27",
+       "hash": "6df2e6c34b7e"
       }
      ]
     }
